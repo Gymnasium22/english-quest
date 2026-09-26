@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+tsconfig.tsbuildinfo
+unit 1 FAMILY.docx
+Промпт.txt
+Промпт2.txt
+Промпт3.txt
+Промпт4.txt
+Промпт5.txt
+.env
+.env.local
+.env*.local
+*.log
+.DS_Store
+.vercel
