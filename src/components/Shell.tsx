@@ -49,7 +49,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </nav>
         <div className="flex items-center gap-2 text-sm">
           <Stat label="XP" value={String(state.xp)} />
-          <Stat label="Серия" value={String(state.bestStreak)} />
+          <Stat label="Лучшая серия" value={String(state.bestStreak)} />
           <Link href="/settings" className="grid h-11 w-11 place-items-center rounded-2xl bg-stone-900 text-sm text-[#f4efe6]" aria-label="Настройки">
             {state.name.slice(0, 1).toUpperCase()}
           </Link>

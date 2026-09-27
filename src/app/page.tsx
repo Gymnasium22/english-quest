@@ -25,8 +25,8 @@ export default function HomePage() {
         </div>
         <div className="mt-4 flex gap-4 text-sm text-stone-600 sm:hidden">
           <span>XP {state.xp}</span>
-          <span>Серия {state.bestStreak}</span>
-          <span>Дней {state.dayStreak}</span>
+          <span>Лучшая серия {state.bestStreak}</span>
+          <span>Дни {state.dayStreak}</span>
         </div>
       </section>
 
@@ -43,7 +43,7 @@ export default function HomePage() {
                 <div className="text-xs tracking-[0.18em]" style={{ color: m.accent }}>0{i + 1} · {status}</div>
                 <h2 className="text-2xl sm:text-3xl">{m.title}</h2>
                 <p className="text-sm text-stone-600">{m.kicker} · {m.countLabel}</p>
-                <p className="mt-2 text-sm">{pct}% · заданий {done} из {total}</p>
+                <p className="mt-2 text-sm">{done} из {total} заданий</p>
                 <div className="mt-2 h-1.5 max-w-xs rounded-full bg-stone-900/10"><div className="h-full rounded-full" style={{ width: `${pct}%`, background: m.accent }} /></div>
               </div>
               <Link href={m.href} className="inline-flex min-h-12 items-center justify-center rounded-full px-6 text-white transition group-hover:brightness-110" style={{ background: m.accent }}>Начать</Link>

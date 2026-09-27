@@ -46,7 +46,9 @@ function load(): ProgressState {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return empty();
-    return { ...empty(), ...JSON.parse(raw) };
+    const parsed = { ...empty(), ...JSON.parse(raw) };
+    if (!parsed.name || parsed.name === "Learner") parsed.name = "Ученик";
+    return parsed;
   } catch {
     return empty();
   }
@@ -84,6 +86,7 @@ function award(s: ProgressState): string[] {
   if (done("idioms")) add("phrase-hunter");
   if (done("collocations")) add("collocation-pro");
   if (done("word-building")) add("word-builder");
+  if (done("prepositions")) add("prep-pro");
   if (s.finalDone) add("family-quest");
   void vocabMaster;
   return [...got];
@@ -124,7 +127,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     return {
       state,
       ready,
-      setName: (name) => setState((s) => ({ ...s, name: name.slice(0, 24) || "Learner" })),
+      setName: (name) => setState((s) => ({ ...s, name: name.trim().slice(0, 24) || "Ученик" })),
       setMotion: (reduceMotion) => setState((s) => ({ ...s, reduceMotion })),
       record: (itemIds, correct, practiceFlag, awardXp = true) => {
         let gained = 0;
@@ -204,5 +207,6 @@ export const ACHIEVEMENTS = [
   { id: "phrase-hunter", title: "Phrase Hunter", text: "Завершён раздел Idioms & Phrasal Verbs." },
   { id: "collocation-pro", title: "Collocation Pro", text: "Завершён Collocation Collection." },
   { id: "word-builder", title: "Word Builder", text: "Завершён Word Building." },
+  { id: "prep-pro", title: "Prep Pro", text: "Завершён модуль Prepositional Phrases." },
   { id: "family-quest", title: "Family Quest Complete", text: "Пройден весь Unit 1." },
 ];

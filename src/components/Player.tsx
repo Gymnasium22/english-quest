@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { MODULES } from "@/data/unit1";
 import { copyFor, type Question } from "@/lib/questions";
 import { useProgress } from "@/lib/progress";
 import { HintIcon } from "@/components/Marks";
@@ -50,7 +51,7 @@ export function Player({
   nextHref?: string;
   onReplay?: () => void;
 }) {
-  const { record, completeActivity, completeFinal, setCursor, state, ready } = useProgress();
+  const { record, completeActivity, completeFinal, setCursor, state, ready, practiceIds, masteredIds, moduleProgress } = useProgress();
   const [deck, setDeck] = useState<Question[]>(questions);
   const mixed = useRef(false);
   useEffect(() => {
@@ -197,6 +198,19 @@ export function Player({
           <div className="rounded-2xl bg-white/80 p-4"><div className="text-xs text-stone-500">Точность</div><div className="text-3xl">{accuracy}%</div></div>
           <div className="rounded-2xl bg-white/80 p-4"><div className="text-xs text-stone-500">Лучшая серия</div><div className="text-3xl">{state.bestStreak}</div></div>
         </div>
+        {finalMode ? (
+          <div className="mt-4 grid gap-3">
+            <p className="text-sm text-stone-700">Нужно повторить: {practiceIds.length}. Уже получается: {masteredIds.length}.</p>
+            <ul className="grid gap-2">
+              {MODULES.map((m) => (
+                <li key={m.id} className="flex items-center justify-between text-sm">
+                  <span>{m.title}</span>
+                  <span>{moduleProgress(m.id)}%</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href={onDoneHref} className="inline-flex min-h-12 items-center rounded-full bg-stone-900 px-6 text-[#f4efe6]">К списку</Link>
           {nextHref ? <Link href={nextHref} className="inline-flex min-h-12 items-center rounded-full px-6 text-white" style={{ background: accent }}>Следующее задание</Link> : null}
@@ -221,10 +235,6 @@ export function Player({
             <div className="text-xs tracking-[0.22em]" style={{ color: accent }}>{text.mechanic}</div>
             <h2 className="mt-1 text-2xl sm:text-3xl">{text.heading}</h2>
             <p className="mt-2 max-w-2xl text-base text-stone-700">{text.instruction}</p>
-            <div className="mt-3 rounded-2xl px-3 py-2 text-sm text-stone-700" style={{ background: wash }}>
-              <span className="mb-1 block text-[10px] tracking-[0.16em] text-stone-500">Что нужно сделать</span>
-              {text.whatToDo}
-            </div>
             <button type="button" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full border border-stone-300 px-3 text-sm" onClick={() => setShowHint((v) => !v)} style={{ color: accent }}>
               <HintIcon /> Подсказка
             </button>
@@ -282,7 +292,7 @@ export function Player({
         ) : null}
         {q.kind === "flip" ? (
           <div>
-            <button type="button" className="relative mx-auto block h-56 w-full max-w-md [perspective:800px]" onClick={() => setFlipped((f) => !f)} aria-label="Flip card">
+            <button type="button" className="relative mx-auto block h-56 w-full max-w-md [perspective:800px]" onClick={() => setFlipped((f) => !f)} aria-label="Перевернуть карточку">
               <div className={`flip relative h-full w-full ${flipped ? "on" : ""}`}>
                 <div className="face absolute inset-0 grid place-items-center rounded-[1.6rem] bg-stone-900 p-6 text-center text-3xl text-[#f4efe6]">{q.front}</div>
                 <div className="face back absolute inset-0 grid place-items-center rounded-[1.6rem] bg-white p-6 text-center">

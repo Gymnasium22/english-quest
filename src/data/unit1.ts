@@ -235,11 +235,11 @@ export const WB_EX2: { sentence: string; options: [string, string]; answer: stri
 ];
 
 export const MODULES = [
-  { id: "vocabulary", title: "Vocabulary", kicker: "Boost your vocabulary", href: "/module/vocabulary", tone: "orange", accent: "#C4622D", wash: "#F8E6D8", countLabel: "33 значения" },
-  { id: "idioms", title: "Idioms & Phrasal Verbs", kicker: "Father and son · Sisters", href: "/module/idioms", tone: "blue", accent: "#2C4C7C", wash: "#E4EAF3", countLabel: "22 выражения" },
-  { id: "collocations", title: "Collocations", kicker: "Collocation collection", href: "/module/collocations", tone: "plum", accent: "#5C3D6E", wash: "#EFE6F3", countLabel: "12 выражений" },
-  { id: "prepositions", title: "Prepositional Phrases", kicker: "I can use prepositional phrases", href: "/module/prepositions", tone: "green", accent: "#3E6B4F", wash: "#E5F0E8", countLabel: "30 фраз" },
-  { id: "word-building", title: "Word Building", kicker: "Verbs and nouns", href: "/module/word-building", tone: "burgundy", accent: "#8E3A3A", wash: "#F6E4E2", countLabel: "25 пар" },
+  { id: "vocabulary", title: "Vocabulary", kicker: "Слова и значения", href: "/module/vocabulary", tone: "orange", accent: "#C4622D", wash: "#F8E6D8", countLabel: "33 значения" },
+  { id: "idioms", title: "Idioms & Phrasal Verbs", kicker: "Фразы из историй о семье", href: "/module/idioms", tone: "blue", accent: "#2C4C7C", wash: "#E4EAF3", countLabel: "22 выражения" },
+  { id: "collocations", title: "Collocations", kicker: "Устойчивые сочетания", href: "/module/collocations", tone: "plum", accent: "#5C3D6E", wash: "#EFE6F3", countLabel: "12 выражений" },
+  { id: "prepositions", title: "Prepositional Phrases", kicker: "Предложные выражения", href: "/module/prepositions", tone: "green", accent: "#3E6B4F", wash: "#E5F0E8", countLabel: "30 фраз" },
+  { id: "word-building", title: "Word Building", kicker: "Глагол и существительное", href: "/module/word-building", tone: "burgundy", accent: "#8E3A3A", wash: "#F6E4E2", countLabel: "25 пар" },
 ] as const;
 
 export type ModuleId = (typeof MODULES)[number]["id"];
