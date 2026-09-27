@@ -212,13 +212,14 @@ function colloActs(): ActivityDef[] {
 
 function prepActs(): ActivityDef[] {
   const withOpp = ENV_PREP.filter((p) => p.opposite);
+  const oppPool = ENV_PREP.map((x) => x.english);
   const opp: Question[] = withOpp.map((p, i) => ({
     kind: "choice" as const,
     id: `opp-${p.id}`,
     itemId: p.id,
     prompt: p.english,
     detail: p.meaning,
-    options: optionsFor(p.opposite!, ENV_PREP.map((x) => x.english), 4, i + 2),
+    options: optionsFor(p.opposite!, oppPool.filter((x) => x !== p.english), 4, i + 2),
     answer: p.opposite!,
     reveal: `${p.english} ↔ ${p.opposite}`,
   }));
@@ -239,7 +240,7 @@ function prepActs(): ActivityDef[] {
     pairs: group.map((g) => ({ id: g.id, left: g.english, right: g.meaning })),
   }));
   return [
-    { id: "opposites", moduleId: "prepositions", title: "Opposites", blurb: "", mechanic: "CHOOSE", heading: "Найдите противоположную фразу", instruction: "Выберите фразу с противоположным значением.", whatToDo: "", hint: "Пары: in the wild / in captivity, in luck / out of luck.", questions: opp },
+    { id: "opposites", moduleId: "prepositions", title: "Opposites", blurb: "", mechanic: "CHOOSE", heading: "Найдите антонимы", instruction: "Выберите антоним к выделенной фразе.", whatToDo: "", hint: "Пары: in the wild / in captivity, in luck / out of luck.", questions: opp },
     { id: "choose", moduleId: "prepositions", title: "Choose", blurb: "", mechanic: "CHOOSE", heading: "Выберите фразу по значению", instruction: "Прочитайте значение и выберите предложную фразу.", whatToDo: "", hint: "Смотрите на предлог: in, under, by, against, out of.", questions: choose },
     { id: "match", moduleId: "prepositions", title: "Match", blurb: "", mechanic: "MATCH", heading: "Соедините фразу и значение", instruction: "Нажмите английскую фразу, затем русский перевод.", whatToDo: "", hint: "Сначала найдите короткие знакомые фразы.", questions: match },
   ];

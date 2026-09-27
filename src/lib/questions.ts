@@ -385,13 +385,14 @@ function colloActivities(): ActivityDef[] {
 
 function prepActivities(): ActivityDef[] {
   const pairs = PREP_A.filter((p) => p.opposite);
+  const oppPool = PREP_A.map((x) => x.english);
   const opp: Question[] = pairs.map((p, i) => ({
     kind: "choice" as const,
     id: `opp-${p.id}`,
     itemId: p.id,
     prompt: p.english,
     detail: p.definition,
-    options: optionsFor(p.opposite!, PREP_A.map((x) => x.english), 4, i + 2),
+    options: optionsFor(p.opposite!, oppPool.filter((x) => x !== p.english), 4, i + 2),
     answer: p.opposite!,
     reveal: `${p.english} ↔ ${p.opposite}. ${p.example}`,
   }));
@@ -426,7 +427,7 @@ function prepActivities(): ActivityDef[] {
     cards: group.map((g) => ({ id: g.id, label: g.english, bucket: g.preposition })),
   }));
   return [
-    { id: "opposites", moduleId: "prepositions", title: "Find the opposite", blurb: "A · Opposites", mechanic: "CHOOSE", heading: "Найдите противоположную фразу", instruction: "Выберите выражение, которое является противоположным по значению.", whatToDo: "Найдите противоположную фразу.", hint: "Ищите фразу на ту же тему: duty, tune, control, theory.", questions: opp },
+    { id: "opposites", moduleId: "prepositions", title: "Find the opposite", blurb: "A · Opposites", mechanic: "CHOOSE", heading: "Найдите антонимы", instruction: "Выберите антоним к выделенной фразе.", whatToDo: "", hint: "Ищите фразу на ту же тему: duty, tune, control, theory.", questions: opp },
     { id: "complete", moduleId: "prepositions", title: "Complete the phrase", blurb: "Фразы с предлогом", mechanic: "COMPLETE THE PHRASE", heading: "Соберите фразу с предлогом", instruction: "Сверху указан предлог. Выберите фразу, которая с него начинается.", whatToDo: "Выберите фразу целиком.", hint: "Прочитайте значение: оно описывает одну фразу.", questions: complete },
     { id: "choose", moduleId: "prepositions", title: "Choose the phrase", blurb: "Значение", mechanic: "CHOOSE", heading: "Выберите верную фразу", instruction: "По значению выберите предложную фразу.", whatToDo: "Одно выражение совпадает со значением.", hint: "Если в значении есть синоним, он помогает узнать фразу.", questions: choose },
     { id: "sort", moduleId: "prepositions", title: "Sort", blurb: "IN · ON · AT · BY · OUT OF", mechanic: "SORT", heading: "Распределите фразы по группам", instruction: "Перетащите каждую фразу в группу её предлога или нажмите фразу, затем группу.", whatToDo: "Группы: IN, ON, AT, BY, OUT OF.", hint: "Группа совпадает с первым словом фразы.", questions: sort },
