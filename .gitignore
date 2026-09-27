@@ -8,6 +8,7 @@ unit 1 FAMILY.docx
 Промпт3.txt
 Промпт4.txt
 Промпт5.txt
+screen/
 .env
 .env.local
 .env*.local
