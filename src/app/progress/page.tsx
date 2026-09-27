@@ -19,7 +19,11 @@ export default function ProgressPage() {
     <main>
       <TopBar title="Прогресс" meta={`${state.xp} XP`} />
       <UnitSwitch />
-      <p className="mb-4 text-sm text-stone-600">Сейчас: {currentUnit === "unit2" ? "Environmental Issues" : "Family"}. {currentUnit === "unit2" ? <Link href="/unit/family" className="underline">К Family</Link> : <Link href="/unit/environmental" className="underline">К Environmental Issues</Link>}</p>
+      <p className="mb-4 text-sm text-stone-600">
+        Открыт юнит {currentUnit === "unit2" ? "Environmental Issues" : "Family"}.
+        {" "}
+        {currentUnit === "unit2" ? <Link href="/unit/family" className="underline">Перейти к Family</Link> : <Link href="/unit/environmental" className="underline">Перейти к Environmental Issues</Link>}
+      </p>
       <section className="grid gap-3 sm:grid-cols-3">
         <Card label="Точность" value={`${accuracy}%`} />
         <Card label="Лучшая серия" value={String(state.bestStreak)} />

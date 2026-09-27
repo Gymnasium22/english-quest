@@ -7,9 +7,9 @@ import { ACHIEVEMENTS, ACHIEVEMENTS_ENV, useProgress } from "@/lib/progress";
 
 function brand(path: string, unit: string) {
   if (path === "/") return { kicker: "ENGLISH QUEST", title: "QUEST", sub: "English Quest" };
-  if (path.startsWith("/env") || path.startsWith("/unit/environmental")) return { kicker: "UNIT 2", title: "ISSUES", sub: "Environmental Issues" };
+  if (path.startsWith("/env") || path.startsWith("/unit/environmental")) return { kicker: "UNIT 2", title: "NATURE", sub: "Environmental Issues" };
   if (path.startsWith("/unit/family") || path.startsWith("/module") || path === "/final") return { kicker: "UNIT 1", title: "FAMILY", sub: "English Quest" };
-  if (unit === "unit2") return { kicker: "UNIT 2", title: "ISSUES", sub: "Environmental Issues" };
+  if (unit === "unit2") return { kicker: "UNIT 2", title: "NATURE", sub: "Environmental Issues" };
   return { kicker: "UNIT 1", title: "FAMILY", sub: "English Quest" };
 }
 
@@ -28,6 +28,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const { state, ready, headerXp, currentUnit } = useProgress();
   const [toast, setToast] = useState<string | null>(null);
   const seen = useRef<string[] | null>(null);
+  useEffect(() => {
+    if (path === "/" || path === "/unit/family" || path === "/unit/environmental") {
+      sessionStorage.setItem("eq-hub", path);
+    }
+  }, [path]);
   useEffect(() => {
     if (!ready) return;
     if (seen.current === null) {
@@ -71,7 +76,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             const on = path === l.href;
             return (
               <li key={l.href}>
-                <Link href={l.href} className={`block rounded-2xl px-2 py-3 text-center text-sm ${on ? "bg-stone-900 text-[#f4efe6]" : "text-stone-700"}`}>
+                <Link href={l.href} className={`block rounded-2xl px-0.5 py-2 text-center text-[11px] leading-tight ${on ? "bg-stone-900 text-[#f4efe6]" : "text-stone-700"}`}>
                   {l.label}
                 </Link>
               </li>
@@ -102,9 +107,17 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+function hubBack(path: string) {
+  if (path.startsWith("/env") || path === "/env/final") return "/unit/environmental";
+  if (path.startsWith("/module") || path === "/final") return "/unit/family";
+  if (path.startsWith("/unit/")) return "/";
+  if (typeof sessionStorage !== "undefined") return sessionStorage.getItem("eq-hub") || "/";
+  return "/";
+}
+
 export function TopBar({ title, meta, backHref }: { title: string; meta?: string; backHref?: string }) {
   const path = usePathname();
-  const back = backHref ?? (path.startsWith("/env") || path.startsWith("/unit/environmental") ? "/unit/environmental" : path.startsWith("/module") || path.startsWith("/unit/family") ? "/unit/family" : "/");
+  const back = backHref ?? hubBack(path);
   return (
     <div className="mb-4 flex items-end justify-between gap-3">
       <div>

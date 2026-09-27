@@ -14,7 +14,7 @@ export default function ReviewPage() {
     <main>
       <TopBar title="Повторение" meta={ready ? (practiceIds.length ? String(practiceIds.length) : "нет слов") : ""} />
       <UnitSwitch />
-      <p className="mb-4 text-sm text-stone-600">Сейчас: {currentUnit === "unit2" ? "Environmental Issues" : "Family"}.</p>
+      <p className="mb-4 text-sm text-stone-600">Открыт юнит {currentUnit === "unit2" ? "Environmental Issues" : "Family"}.</p>
       {!ready ? <p className="text-sm text-stone-500">Загрузка…</p> : null}
       <ul className="mb-4 grid gap-2">
         {practiceIds.length ? practiceIds.map((id) => (

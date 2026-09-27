@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { COLLOCATIONS, FATHER, PREP_A, PREP_B, SISTERS, SPOTLIGHT_STAY, VOCAB, WORD_FAMILIES } from "@/data/unit1";
 import { ENV_IDIOMS, ENV_PHRASALS, ENV_PREP, ENV_VOCAB } from "@/data/unit2";
-import { TopBar } from "@/components/Shell";
+import { TopBar, UnitSwitch } from "@/components/Shell";
 import { useProgress } from "@/lib/progress";
 
 type Row = { id: string; en: string; ru: string; extra?: string; group: string };
@@ -36,7 +36,7 @@ function Section({ title, rows, items, query }: { title: string; rows: Row[]; it
 }
 
 export default function GlossaryPage() {
-  const { family, env } = useProgress();
+  const { family, env, currentUnit } = useProgress();
   const [query, setQuery] = useState("");
   const familyRows = useMemo<Row[]>(() => [
     ...VOCAB.map((v) => ({ id: v.id, en: v.english, ru: v.translation, extra: v.example, group: "Vocabulary" })),
@@ -56,10 +56,12 @@ export default function GlossaryPage() {
   return (
     <main>
       <TopBar title="Словарь" />
-      <p className="mb-4 text-sm text-stone-600">Перевод и пример открываются после первого верного ответа в задании.</p>
+      <UnitSwitch />
+      <p className="mb-4 text-sm text-stone-600">Открыт юнит {currentUnit === "unit2" ? "Environmental Issues" : "Family"}. Перевод и пример открываются после первого верного ответа в задании.</p>
       <input className="mb-6 min-h-12 w-full rounded-2xl border border-stone-300 bg-white px-3" placeholder="Найти слово или перевод" value={query} onChange={(e) => setQuery(e.target.value)} />
-      <Section title="Family" rows={familyRows} items={family.items} query={query} />
-      <Section title="Environmental Issues" rows={envRows} items={env.items} query={query} />
+      {currentUnit === "unit2"
+        ? <Section title="Environmental Issues" rows={envRows} items={env.items} query={query} />
+        : <Section title="Family" rows={familyRows} items={family.items} query={query} />}
     </main>
   );
 }
