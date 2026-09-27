@@ -32,6 +32,22 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out;
 }
 
+function chunk34<T>(arr: T[]): T[][] {
+  const out: T[][] = [];
+  let i = 0;
+  while (i < arr.length) {
+    const left = arr.length - i;
+    const size = left > 4 ? 3 : left;
+    out.push(arr.slice(i, i + size));
+    i += size;
+  }
+  if (out.length >= 2 && out[out.length - 1].length < 3) {
+    const tail = out.pop()!;
+    out[out.length - 1] = [...out[out.length - 1], ...tail];
+  }
+  return out.filter((g) => g.length >= 3);
+}
+
 function blankExample(example: string, surface: string): { before: string; after: string } | null {
   const forms = surface.split("/").map((s) => s.trim()).filter((s) => s.length > 2);
   const ordered = [...forms].sort((a, b) => b.length - a.length);
@@ -113,12 +129,12 @@ function vocabActs(): ActivityDef[] {
 
 function idiomActs(): ActivityDef[] {
   const all = [...ENV_IDIOMS, ...ENV_PHRASALS];
-  const match: Question[] = chunk(ENV_IDIOMS, 3).map((group, i) => ({
+  const match: Question[] = chunk34(ENV_IDIOMS).map((group, i) => ({
     kind: "match" as const,
     id: `ei-m-${i}`,
     itemIds: group.map((g) => g.id),
-    prompt: "Соедините ситуацию и идиому.",
-    pairs: group.map((g) => ({ id: g.id, left: g.translation, right: g.english })),
+    prompt: "",
+    pairs: group.map((g) => ({ id: g.id, left: g.definition, right: g.english })),
   }));
   const broken: Question[] = [
     { kind: "choice", id: "br-rain", itemId: "come-rain-or-shine", prompt: "come rain or ______", options: ["shine", "wind", "luck", "flood"], answer: "shine", reveal: "come rain or shine" },
@@ -150,7 +166,7 @@ function idiomActs(): ActivityDef[] {
   }));
   void all;
   return [
-    { id: "match", moduleId: "idioms", title: "Match", blurb: "", mechanic: "MATCH", heading: "Соедините ситуацию и идиому", instruction: "Нажмите русское описание, затем английскую идиому.", whatToDo: "", hint: "Ищите ключевое слово: дождь, удача, сад, дерево.", questions: match },
+    { id: "match", moduleId: "idioms", title: "Match", blurb: "", mechanic: "MATCH", heading: "Соедините определение и идиому", instruction: "Нажмите определение, затем идиому.", whatToDo: "", hint: "Сначала прочитайте все определения слева.", questions: match },
     { id: "broken", moduleId: "idioms", title: "Complete", blurb: "", mechanic: "FILL THE GAP", heading: "Дополните идиому", instruction: "Выберите пропущенное слово.", whatToDo: "", hint: "Вспомните устойчивую пару слов.", questions: broken },
     { id: "forecast", moduleId: "idioms", title: "Forecast", blurb: "", mechanic: "STORY", heading: "Прогноз погоды", instruction: "Выберите выражение, которое подходит в фрагмент прогноза.", whatToDo: "", hint: "Это прогноз: солнце, облака, дождь, выходные.", questions: story },
     { id: "choose", moduleId: "idioms", title: "Choose", blurb: "", mechanic: "CHOOSE", heading: "Выберите выражение по значению", instruction: "Прочитайте английское определение и выберите выражение.", whatToDo: "", hint: "Определение описывает одно выражение.", questions: ENV_PHRASALS.map((p, i) => ({

@@ -157,7 +157,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const stored = (localStorage.getItem(CURRENT) as QuestUnit) || "unit1";
     setFamily(f);
     setEnv(e);
-    setCurrentUnit(pathUnit(path, stored));
+    const unit = pathUnit(path, stored);
+    setCurrentUnit(unit);
+    localStorage.setItem(CURRENT, unit);
     setReady(true);
   }, []);
 
@@ -226,6 +228,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
               practice: practiceFlag ?? (correct ? false : true),
             };
           });
+          const alreadyCorrect = itemIds.every((id) => (s.items[id]?.correct ?? 0) > 0);
           if (!awardXp) {
             const next = { ...s, items };
             next.achievements = award(next);
@@ -233,7 +236,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
           }
           const combo = correct ? (s.combo ?? 0) + 1 : 0;
           const bonus = correct && combo > 0 && combo % 3 === 0 ? 5 : 0;
-          gained = correct ? 10 + bonus : 0;
+          gained = correct && !alreadyCorrect ? 10 + bonus : 0;
           const next = {
             ...s,
             combo,

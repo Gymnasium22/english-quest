@@ -7,7 +7,7 @@ import { useProgress } from "@/lib/progress";
 import { Mark } from "@/components/Marks";
 
 export default function EnvUnitPage() {
-  const { state, moduleProgress, unitProgress, finalReady, tasksLeftForFinal, headerXp } = useProgress();
+  const { state, moduleProgress, unitProgress, finalReady, tasksLeftForFinal, headerXp, selectUnit } = useProgress();
   const finalOpen = finalReady;
   return (
     <main>
@@ -17,7 +17,7 @@ export default function EnvUnitPage() {
         <p className="mt-4 max-w-lg text-stone-700">Природа, погода и экологические проблемы.</p>
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <Link href="/env/module/vocabulary" className="inline-flex min-h-12 items-center rounded-full bg-stone-900 px-6 text-[#f4efe6]">Начать практику</Link>
-          <Link href="/quick-practice" className="inline-flex min-h-12 items-center rounded-full border border-stone-300 bg-white/70 px-5">Быстрая практика · 5</Link>
+          <Link href="/quick-practice" onClick={() => selectUnit("unit2")} className="inline-flex min-h-12 items-center rounded-full border border-stone-300 bg-white/70 px-5">Быстрая практика · 5</Link>
         </div>
         <div className="mt-8 max-w-md">
           <div className="mb-1 flex justify-between text-xs tracking-widest text-stone-500"><span>UNIT PROGRESS</span><span>{unitProgress}%</span></div>

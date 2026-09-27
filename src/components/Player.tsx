@@ -109,6 +109,30 @@ export function Player({
   }, [step, q]);
 
   useEffect(() => {
+    if (!q || q.kind !== "match") return;
+    if (Object.keys(placed).length !== q.pairs.length) return;
+    if (answered.current || pending || ok !== null) return;
+    const good = q.pairs.every((p) => placed[p.left] === p.right);
+    if (good) grade(true, q.itemIds);
+    else {
+      setPlaced({});
+      miss(q.itemIds);
+    }
+  }, [placed, q, pending, ok]);
+
+  useEffect(() => {
+    if (!q || q.kind !== "sort") return;
+    if (Object.keys(bucketPick).length !== q.cards.length) return;
+    if (answered.current || pending || ok !== null) return;
+    const good = q.cards.every((c) => bucketPick[c.id] === c.bucket);
+    if (good) grade(true, q.itemIds);
+    else {
+      setBucketPick({});
+      miss(q.itemIds);
+    }
+  }, [bucketPick, q, pending, ok]);
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!q || q.kind === "match" || q.kind === "order" || q.kind === "sort" || q.kind === "flip") return;
       const opts = "options" in q ? q.options : [];
@@ -128,10 +152,11 @@ export function Player({
     const combo = correct ? state.combo + 1 : 0;
     const bonus = correct && combo > 0 && combo % 3 === 0 ? 5 : 0;
     const replay = Boolean(activityKey && state.completed.includes(activityKey));
+    const already = ids.every((id) => (state.items[id]?.correct ?? 0) > 0);
     record(ids, correct, practice, !replay);
     setOk(correct);
     setPending(false);
-    setGain(replay || !correct ? 0 : 10 + bonus);
+    setGain(replay || already || !correct ? 0 : 10 + bonus);
     setSession((s) => ({ asked: s.asked + 1, correct: s.correct + (correct ? 1 : 0) }));
   }
 
@@ -140,11 +165,17 @@ export function Player({
     setTries(nextTry);
     setPicked(null);
     if (nextTry < 2) {
+      record(ids, false, true, false);
       setPending(true);
       setOk(null);
       return;
     }
-    grade(false, ids);
+    if (answered.current) return;
+    answered.current = true;
+    setOk(false);
+    setPending(false);
+    setGain(0);
+    setSession((s) => ({ asked: s.asked + 1, correct: s.correct }));
   }
 
   function choose(option: string) {
@@ -235,8 +266,8 @@ export function Player({
       <article className="glass rise rounded-3xl p-4 sm:p-8" key={q.id} style={{ boxShadow: `inset 4px 0 0 ${accent}` }}>
         {text ? (
           <header className="mb-5">
-            <div className="text-xs tracking-[0.22em]" style={{ color: accent }}>{text.mechanic}</div>
-            <h2 className="mt-1 text-2xl sm:text-3xl">{text.heading}</h2>
+            {text.mechanic !== title ? <div className="text-xs tracking-[0.22em]" style={{ color: accent }}>{text.mechanic}</div> : null}
+            <h2 className={`${text.mechanic !== title ? "mt-1 " : ""}text-2xl sm:text-3xl`}>{text.heading}</h2>
             <p className="mt-2 max-w-2xl text-base text-stone-700">{text.instruction}</p>
             <button type="button" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full border border-stone-300 px-3 text-sm" onClick={() => setShowHint((v) => !v)} style={{ color: accent }}>
               <HintIcon /> Подсказка
@@ -281,14 +312,8 @@ export function Player({
             selectedLeft={selectedLeft}
             setSelectedLeft={setSelectedLeft}
             onPlace={(left, right) => {
-              const nextPlaced = { ...placed, [left]: right };
-              setPlaced(nextPlaced);
+              setPlaced((prev) => ({ ...prev, [left]: right }));
               setSelectedLeft(null);
-              if (Object.keys(nextPlaced).length === q.pairs.length) {
-                const good = q.pairs.every((p) => nextPlaced[p.left] === p.right);
-                if (good) grade(true, q.itemIds);
-                else { setPlaced({}); miss(q.itemIds); }
-              }
             }}
             locked={ok !== null || pending}
           />
@@ -338,14 +363,8 @@ export function Player({
         ) : null}
         {q.kind === "sort" ? (
           <SortBlock q={q} bucketPick={bucketPick} activeCard={activeCard} setActiveCard={setActiveCard} locked={ok !== null || pending} onDrop={(card, bucket) => {
-            const nextMap = { ...bucketPick, [card]: bucket };
-            setBucketPick(nextMap);
+            setBucketPick((prev) => ({ ...prev, [card]: bucket }));
             setActiveCard(null);
-            if (Object.keys(nextMap).length === q.cards.length) {
-              const good = q.cards.every((c) => nextMap[c.id] === c.bucket);
-              if (good) grade(true, q.itemIds);
-              else { setBucketPick({}); miss(q.itemIds); }
-            }
           }} />
         ) : null}
         {pending ? (
@@ -403,14 +422,14 @@ function MatchBlock({ q, placed, selectedLeft, setSelectedLeft, onPlace, locked 
   const [rights] = useState(() => shuffled(q.pairs.map((p) => p.right)));
   return (
     <div>
-      <p className="text-sm text-stone-500">{q.prompt}</p>
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
+      {q.prompt ? <p className="text-sm text-stone-500">{q.prompt}</p> : null}
+      <div className={`${q.prompt ? "mt-4 " : ""}max-h-[min(28rem,calc(100dvh-16rem))] overflow-y-auto overscroll-contain grid grid-cols-2 gap-2 sm:gap-3 pb-1`}>
         <div className="grid gap-2">
           {q.pairs.map((p) => (
             <button key={p.id} type="button" disabled={locked || Boolean(placed[p.left])} draggable={!locked}
               onDragStart={() => setSelectedLeft(p.left)}
               onClick={() => setSelectedLeft(p.left)}
-              className={`min-h-14 rounded-2xl px-3 text-left ${selectedLeft === p.left ? "bg-stone-900 text-[#f4efe6]" : "bg-white"} ${placed[p.left] ? "opacity-50" : ""}`}>
+              className={`min-h-14 rounded-2xl px-2 py-2 text-left text-sm leading-snug sm:px-3 sm:text-base ${selectedLeft === p.left ? "bg-stone-900 text-[#f4efe6]" : "bg-white"} ${placed[p.left] ? "opacity-50" : ""}`}>
               {p.left}
               {placed[p.left] ? <span className="mt-1 block text-sm opacity-80">{placed[p.left]}</span> : null}
             </button>
@@ -422,7 +441,7 @@ function MatchBlock({ q, placed, selectedLeft, setSelectedLeft, onPlace, locked 
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => { if (selectedLeft) onPlace(selectedLeft, r); }}
               onClick={() => { if (selectedLeft) onPlace(selectedLeft, r); }}
-              className="min-h-14 rounded-2xl border border-dashed border-stone-400 bg-[#f7f3ec] px-3 text-left">
+              className="min-h-14 rounded-2xl border border-dashed border-stone-400 bg-[#f7f3ec] px-2 py-2 text-left text-sm leading-snug sm:px-3 sm:text-base">
               {r}
             </button>
           ))}
