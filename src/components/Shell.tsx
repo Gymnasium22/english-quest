@@ -38,9 +38,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <div className="nav-safe mx-auto min-h-screen w-full max-w-6xl px-4 pt-4 sm:px-6">
       <header className="glass rise mb-5 flex items-center justify-between gap-3 rounded-3xl px-4 py-3 sm:px-5">
         <Link href="/" className="min-w-0">
-          <div className="text-[11px] tracking-[0.22em] text-stone-500">{currentUnit === "unit2" ? "UNIT 2" : "UNIT 1"}</div>
-          <div className="display truncate text-xl leading-none sm:text-2xl">{currentUnit === "unit2" ? "NATURE" : "FAMILY"}</div>
-          <div className="-mt-0.5 text-sm text-stone-600">English Quest</div>
+          <div className="text-[11px] tracking-[0.22em] text-stone-500">{path === "/" ? "ENGLISH QUEST" : currentUnit === "unit2" ? "UNIT 2" : "UNIT 1"}</div>
+          <div className="display truncate text-xl leading-none sm:text-2xl">{path === "/" ? "QUEST" : currentUnit === "unit2" ? "ISSUES" : "FAMILY"}</div>
+          <div className="-mt-0.5 text-sm text-stone-600">{path === "/" ? "English Quest" : currentUnit === "unit2" ? "Environmental Issues" : "English Quest"}</div>
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           {menu.map((l) => (
@@ -71,6 +71,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
           })}
         </ul>
       </nav>
+    </div>
+  );
+}
+
+export function UnitSwitch() {
+  const { currentUnit, selectUnit } = useProgress();
+  return (
+    <div className="mb-4 flex flex-wrap gap-2">
+      <button type="button" onClick={() => selectUnit("unit1")} className={`min-h-11 rounded-full px-4 text-sm ${currentUnit === "unit1" ? "bg-stone-900 text-[#f4efe6]" : "border border-stone-300"}`}>Family</button>
+      <button type="button" onClick={() => selectUnit("unit2")} className={`min-h-11 rounded-full px-4 text-sm ${currentUnit === "unit2" ? "bg-stone-900 text-[#f4efe6]" : "border border-stone-300"}`}>Environmental Issues</button>
     </div>
   );
 }

@@ -8,7 +8,7 @@ export default function AchievementsPage() {
   return (
     <main>
       <TopBar title="Достижения" />
-      <h2 className="mb-3 text-sm tracking-[0.16em] text-stone-500">FAMILY</h2>
+      <h2 className="mb-3 text-sm tracking-[0.16em] text-stone-500">Family</h2>
       <ul className="mb-8 grid gap-3 sm:grid-cols-2">
         {ACHIEVEMENTS.map((a) => {
           const on = family.achievements.includes(a.id);

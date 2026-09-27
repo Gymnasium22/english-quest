@@ -16,7 +16,7 @@ export default function EnvUnitPage() {
         <h1 className="mt-3 max-w-xl text-5xl leading-[0.95] sm:text-7xl">Environmental<br />Issues</h1>
         <p className="mt-4 max-w-lg text-stone-700">Природа, погода и экологические проблемы.</p>
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <Link href="/env/module/vocabulary" className="inline-flex min-h-12 items-center rounded-full bg-stone-900 px-6 text-[#f4efe6]">Начать Unit 2</Link>
+          <Link href="/env/module/vocabulary" className="inline-flex min-h-12 items-center rounded-full bg-stone-900 px-6 text-[#f4efe6]">Начать практику</Link>
           <Link href="/quick-practice" className="inline-flex min-h-12 items-center rounded-full border border-stone-300 bg-white/70 px-5">Быстрая практика · 5</Link>
         </div>
         <div className="mt-8 max-w-md">

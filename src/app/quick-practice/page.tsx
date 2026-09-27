@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { quickQuestions } from "@/lib/questions";
 import { envQuick } from "@/lib/questions-env";
 import { Player } from "@/components/Player";
-import { TopBar } from "@/components/Shell";
+import { TopBar, UnitSwitch } from "@/components/Shell";
 import { useProgress } from "@/lib/progress";
 
 export default function QuickPage() {
@@ -18,8 +18,9 @@ export default function QuickPage() {
   return (
     <main>
       <TopBar title="Быстрая практика" meta="5 вопросов" />
+      <UnitSwitch />
       {started ? (
-        <Player key={seed} title="Быстрая практика" questions={questions} onReplay={() => setSeed(Date.now() % 100000)} />
+        <Player key={`${currentUnit}-${seed}`} title="Быстрая практика" questions={questions} onReplay={() => setSeed(Date.now() % 100000)} />
       ) : (
         <section className="glass rounded-3xl p-6 sm:p-10">
           <h2 className="text-4xl">Быстрая практика</h2>
