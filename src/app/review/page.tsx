@@ -6,8 +6,15 @@ import { Player } from "@/components/Player";
 import { TopBar } from "@/components/Shell";
 
 export default function ReviewPage() {
-  const { practiceIds, state } = useProgress();
+  const { practiceIds, state, ready } = useProgress();
   const questions = reviewQuestions(practiceIds);
+  if (!ready) {
+    return (
+      <main>
+        <TopBar title="Повторение" />
+      </main>
+    );
+  }
   return (
     <main>
       <TopBar title="Повторение" meta={practiceIds.length ? String(practiceIds.length) : "нет слов"} />
@@ -19,7 +26,7 @@ export default function ReviewPage() {
           </li>
         )) : <li className="text-stone-700">Пока нет слов для повторения.</li>}
       </ul>
-      <Player title="Повторение" questions={questions} onDoneHref="/review" />
+      <Player key={practiceIds.join("|") || "empty"} title="Повторение" questions={questions} onDoneHref="/review" />
     </main>
   );
 }

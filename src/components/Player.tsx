@@ -51,7 +51,13 @@ export function Player({
   onReplay?: () => void;
 }) {
   const { record, completeActivity, completeFinal, setCursor, state, ready } = useProgress();
-  const [deck] = useState(() => mixDeck(questions));
+  const [deck, setDeck] = useState<Question[]>(questions);
+  const mixed = useRef(false);
+  useEffect(() => {
+    if (mixed.current) return;
+    mixed.current = true;
+    setDeck(mixDeck(questions));
+  }, [questions]);
   const [step, setStep] = useState(0);
   const [rest, setRest] = useState(false);
   const [session, setSession] = useState({ asked: 0, correct: 0 });
@@ -103,7 +109,7 @@ export function Player({
       if (!q || q.kind === "match" || q.kind === "order" || q.kind === "sort" || q.kind === "flip") return;
       const opts = "options" in q ? q.options : [];
       const n = Number(e.key);
-      if (n >= 1 && n <= opts.length && ok === null) choose(opts[n - 1]);
+      if (n >= 1 && n <= opts.length && ok === null && !pending && !answered.current) choose(opts[n - 1]);
       if (e.key === "Enter" && ok !== null) next();
     };
     window.addEventListener("keydown", onKey);
@@ -117,10 +123,11 @@ export function Player({
     answered.current = true;
     const combo = correct ? state.combo + 1 : 0;
     const bonus = correct && combo > 0 && combo % 3 === 0 ? 5 : 0;
-    record(ids, correct, practice);
+    const replay = Boolean(activityKey && state.completed.includes(activityKey));
+    record(ids, correct, practice, !replay);
     setOk(correct);
     setPending(false);
-    setGain(correct ? 10 + bonus : 0);
+    setGain(replay || !correct ? 0 : 10 + bonus);
     setSession((s) => ({ asked: s.asked + 1, correct: s.correct + (correct ? 1 : 0) }));
   }
 

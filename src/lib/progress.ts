@@ -23,7 +23,7 @@ export type ProgressState = {
 const KEY = "english-quest-unit1";
 
 const empty = (): ProgressState => ({
-  name: "Learner",
+  name: "Ученик",
   xp: 0,
   bestStreak: 0,
   combo: 0,
@@ -57,7 +57,7 @@ type Api = {
   ready: boolean;
   setName: (name: string) => void;
   setMotion: (v: boolean) => void;
-  record: (itemIds: string[], correct: boolean, practiceFlag?: boolean) => number;
+  record: (itemIds: string[], correct: boolean, practiceFlag?: boolean, awardXp?: boolean) => number;
   completeActivity: (key: string) => void;
   completeFinal: () => void;
   moduleProgress: (id: ModuleId) => number;
@@ -126,7 +126,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       ready,
       setName: (name) => setState((s) => ({ ...s, name: name.slice(0, 24) || "Learner" })),
       setMotion: (reduceMotion) => setState((s) => ({ ...s, reduceMotion })),
-      record: (itemIds, correct, practiceFlag) => {
+      record: (itemIds, correct, practiceFlag, awardXp = true) => {
         let gained = 0;
         setState((s) => {
           const items = { ...s.items };
@@ -138,6 +138,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
               practice: practiceFlag ?? (correct ? false : true),
             };
           });
+          if (!awardXp) {
+            const next = { ...s, items };
+            next.achievements = award(next);
+            return next;
+          }
           const combo = correct ? (s.combo ?? 0) + 1 : 0;
           const bonus = correct && combo > 0 && combo % 3 === 0 ? 5 : 0;
           gained = correct ? 10 + bonus : 0;

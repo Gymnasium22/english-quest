@@ -88,7 +88,7 @@ export function TopBar({ title, meta }: { title: string; meta?: string }) {
   return (
     <div className="mb-4 flex items-end justify-between gap-3">
       <div>
-        <Link href="/" className="text-sm text-stone-600 underline-offset-4 hover:underline">← Back</Link>
+        <Link href="/" className="text-sm text-stone-600 underline-offset-4 hover:underline">← Назад</Link>
         <h1 className="mt-1 text-3xl sm:text-4xl">{title}</h1>
       </div>
       {meta ? <div className="text-sm text-stone-600">{meta}</div> : null}

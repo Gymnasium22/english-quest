@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { quickQuestions } from "@/lib/questions";
 import { Player } from "@/components/Player";
 import { TopBar } from "@/components/Shell";
 
 export default function QuickPage() {
-  const [seed, setSeed] = useState(() => Date.now() % 100000);
+  const [seed, setSeed] = useState(1);
+  useEffect(() => {
+    setSeed(Date.now() % 100000);
+  }, []);
   const questions = quickQuestions(seed);
   return (
     <main>
