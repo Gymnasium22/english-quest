@@ -267,9 +267,9 @@ export function Player({
         {text ? (
           <header className="mb-5">
             {text.mechanic !== title ? <div className="text-xs tracking-[0.22em]" style={{ color: accent }}>{text.mechanic}</div> : null}
-            <h2 className={`${text.mechanic !== title ? "mt-1 " : ""}text-2xl sm:text-3xl`}>{text.heading}</h2>
-            <p className="mt-2 max-w-2xl text-base text-stone-700">{text.instruction}</p>
-            <button type="button" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full border border-stone-300 px-3 text-sm" onClick={() => setShowHint((v) => !v)} style={{ color: accent }}>
+            <h2 className={`${text.mechanic !== title ? "mt-1 " : ""}text-xl sm:text-3xl`}>{text.heading}</h2>
+            <p className="mt-2 max-w-2xl text-sm text-stone-700 sm:text-base">{text.instruction}</p>
+            <button type="button" className="mt-2 inline-flex min-h-10 items-center gap-2 rounded-full border border-stone-300 px-3 text-sm sm:mt-3 sm:min-h-11" onClick={() => setShowHint((v) => !v)} style={{ color: accent }}>
               <HintIcon /> Подсказка
             </button>
             {showHint ? <p className="mt-2 text-sm text-stone-600">{text.hint}</p> : null}
@@ -395,13 +395,13 @@ function ChoiceBlock({ q, picked, ok, locked, onPick }: { q: Extract<Question, {
   const detail = "detail" in q ? q.detail : undefined;
   return (
     <div>
-      <h2 className="en text-3xl leading-tight sm:text-5xl" lang="en" translate="no">{prompt}</h2>
+      <h2 className="en text-xl leading-tight sm:text-5xl" lang="en" translate="no">{prompt}</h2>
       {detail ? <p className="mt-3 max-h-28 overflow-auto text-sm leading-relaxed text-stone-600" lang="en" translate="no">{detail}</p> : null}
-      <div className="mt-5 grid gap-2">
+      <div className="mt-4 grid max-h-[min(16rem,calc(100dvh-24rem))] gap-2 overflow-y-auto overscroll-contain pb-8 sm:max-h-none sm:pb-1">
         {q.options.map((o, i) => {
           const state = ok === null ? "" : o === q.answer ? "bg-emerald-700 text-white" : o === picked ? "bg-rose-800 text-white" : "opacity-70";
           return (
-            <button key={`${o}-${i}`} type="button" disabled={ok !== null || locked} onClick={() => onPick(o)} className={`min-h-14 rounded-2xl border border-stone-200 bg-[#fffaf4] px-4 text-left text-base sm:text-lg ${state}`} lang="en" translate="no">
+            <button key={`${o}-${i}`} type="button" disabled={ok !== null || locked} onClick={() => onPick(o)} className={`min-h-12 rounded-2xl border border-stone-200 bg-[#fffaf4] px-4 text-left text-base sm:min-h-14 sm:text-lg ${state}`} lang="en" translate="no">
               <span className="mr-2 text-stone-400">{i + 1}</span>{o}
             </button>
           );
@@ -461,17 +461,17 @@ function SortBlock({ q, bucketPick, activeCard, setActiveCard, onDrop, locked }:
 }) {
   return (
     <div>
-      <p className="text-sm text-stone-500">{q.prompt}</p>
+      {q.prompt ? <p className="text-sm text-stone-500">{q.prompt}</p> : null}
       <div className="mt-3 flex flex-wrap gap-2">
         {q.cards.filter((c) => !bucketPick[c.id]).map((c) => (
           <button key={c.id} type="button" draggable={!locked} onDragStart={() => setActiveCard(c.id)} onClick={() => setActiveCard(c.id)} className={`min-h-11 rounded-xl px-3 ${activeCard === c.id ? "bg-stone-900 text-[#f4efe6]" : "bg-white"}`}>{c.label}</button>
         ))}
       </div>
-      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+      <div className={`mt-4 max-h-[min(22rem,calc(100dvh-18rem))] overflow-y-auto overscroll-contain grid gap-2 ${q.buckets.length === 5 ? "grid-cols-5 sm:grid-cols-5" : "sm:grid-cols-2"}`}>
         {q.buckets.map((b) => (
-          <button key={b} type="button" onDragOver={(e) => e.preventDefault()} onDrop={() => { if (activeCard) onDrop(activeCard, b); }} onClick={() => { if (activeCard) onDrop(activeCard, b); }} className="min-h-24 rounded-2xl border border-stone-200 bg-white/70 p-3 text-left">
+          <button key={b} type="button" onDragOver={(e) => e.preventDefault()} onDrop={() => { if (activeCard) onDrop(activeCard, b); }} onClick={() => { if (activeCard) onDrop(activeCard, b); }} className={`rounded-2xl border border-stone-200 bg-white/70 p-2 text-left ${q.buckets.length === 5 ? "min-h-16 sm:min-h-20" : "min-h-24 p-3"}`}>
             <div className="text-xs tracking-widest text-stone-500">{b.toUpperCase()}</div>
-            <div className="mt-2 text-sm">{q.cards.filter((c) => bucketPick[c.id] === b).map((c) => c.label).join(", ")}</div>
+            <div className="mt-1 text-xs sm:text-sm">{q.cards.filter((c) => bucketPick[c.id] === b).map((c) => c.label).join(", ")}</div>
           </button>
         ))}
       </div>

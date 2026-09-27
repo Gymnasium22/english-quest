@@ -104,7 +104,7 @@ function vocabActs(): ActivityDef[] {
     kind: "sort",
     id: "e-rain-scale",
     itemIds: ["shower", "heavy-rain", "pour-down", "torrential-rain", "flood"],
-    prompt: "Расставьте осадки по силе: от слабого к сильному.",
+    prompt: "",
     buckets: ["1", "2", "3", "4", "5"],
     cards: RAIN_SCALE.map((label, i) => ({ id: `rain-${i}`, label, bucket: String(i + 1) })),
   }];
