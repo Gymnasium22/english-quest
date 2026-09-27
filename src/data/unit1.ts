@@ -209,7 +209,7 @@ export const WB_EX1: { sentence: string; answer: string }[] = [
   { sentence: "This job will ______ a lot of patience and skill.", answer: "require" },
   { sentence: "Can you ______ this word to something you already know?", answer: "refer" },
   { sentence: "The company wants to ______ with other countries.", answer: "trade" },
-  { sentence: "Please ______ the old furniture before the guests arrive.", answer: "remove" },
+  { sentence: "Please ______ your shoes before entering.", answer: "remove" },
   { sentence: "I ______ that we leave early to avoid traffic.", answer: "propose" },
   { sentence: "She began to ______ faster when she felt nervous.", answer: "breathe" },
   { sentence: "The artist will ______ his paintings at the gallery.", answer: "exhibit" },
