@@ -82,8 +82,16 @@ export type StoryQ = {
   reveal: string;
 };
 
-export type TypeQ = Question;
-export type Question = ChoiceQ | FillQ | MatchQ | FlipQ | OrderQ | SortQ | StoryQ;
+export type TypeQ = {
+  kind: "type";
+  id: string;
+  itemId: string;
+  prompt: string;
+  answers: string[];
+  reveal: string;
+};
+
+export type Question = ChoiceQ | FillQ | MatchQ | FlipQ | OrderQ | SortQ | StoryQ | TypeQ;
 
 export type ActivityDef = {
   id: string;
@@ -102,6 +110,7 @@ export function copyFor(q: Question) {
   if (q.kind === "match") return { mechanic: "MATCH", heading: "Соедините пары", instruction: "Нажмите карточку слева, затем подходящий вариант справа. Можно перетащить.", whatToDo: "Соедините слово или выражение с переводом или значением.", hint: "Сначала прочитайте все карточки слева и найдите знакомую пару." };
   if (q.kind === "fill" || (q.kind === "choice" && q.prompt.includes("______"))) return { mechanic: "FILL THE GAP", heading: "Вставьте пропущенное слово", instruction: "Выберите слово, которое подходит по смыслу и грамматике.", whatToDo: "Вставьте подходящее слово в пропуск.", hint: "Посмотрите на слова вокруг пропуска: они подсказывают часть речи." };
   if (q.kind === "flip") return { mechanic: "FLASHCARDS", heading: "Проверьте, помните ли вы слово", instruction: "Нажмите на карточку, чтобы увидеть перевод и пример.", whatToDo: "Отметьте, помните вы это слово или его нужно повторить.", hint: "Сначала вспомните значение сами и только потом переворачивайте карточку." };
+  if (q.kind === "type") return { mechanic: "WORD BUILDING", heading: "Напечатайте форму существительного", instruction: "Введите существительное к этому глаголу.", whatToDo: "Напечатайте существительное.", hint: "Если форм две, подойдёт любая из них." };
   if (q.kind === "order") return { mechanic: "WORD ORDER", heading: "Соберите правильное выражение", instruction: "Нажимайте слова в нужном порядке. Повторное нажатие возвращает слово назад.", whatToDo: "Составьте английскую фразу из частей.", hint: "Начните с глагола или с главного слова выражения." };
   if (q.kind === "sort") return { mechanic: "SORT", heading: "Распределите фразы по группам", instruction: "Выберите фразу, затем группу предлога.", whatToDo: "Отнесите каждую фразу к предлогу IN, ON, AT, BY или OUT OF.", hint: "Смотрите на первое слово фразы: это и есть предлог." };
   if (q.kind === "story") return { mechanic: "STORY", heading: "Продолжите историю", instruction: "Прочитайте фрагмент и выберите выражение, которое пропущено.", whatToDo: "Выберите выражение, которое подходит по смыслу.", hint: "Вспомните, о ком говорится в этом фрагменте истории." };
@@ -208,7 +217,7 @@ function vocabActivities(): ActivityDef[] {
     { id: "translation", moduleId: "vocabulary", title: "Choose the translation", blurb: "Выберите перевод", mechanic: "CHOOSE", heading: "Выберите правильный перевод", instruction: "Выберите русский перевод английского слова.", whatToDo: "Один из четырёх вариантов — перевод из словаря Unit 1.", hint: "Сравните часть речи: глагол, существительное или прилагательное.", questions: choice },
     { id: "flashcards", moduleId: "vocabulary", title: "Flashcards", blurb: "I know it / Need practice", mechanic: "FLASHCARDS", heading: "Проверьте, помните ли вы слово", instruction: "Нажмите на карточку, чтобы увидеть перевод и пример.", whatToDo: "Нажмите «Знаю», если помните значение, или «Нужно повторить», если нет.", hint: "Произнесите перевод про себя до переворота карточки.", questions: flip },
     { id: "fill", moduleId: "vocabulary", title: "Fill the gap", blurb: "Предложения с пропуском", mechanic: "FILL THE GAP", heading: "Вставьте пропущенное слово", instruction: "Выберите слово, которое подходит по смыслу и грамматике.", whatToDo: "Вставьте слово в пропуск.", hint: "Прочитайте всё предложение целиком, затем смотрите на пропуск.", questions: fill },
-    { id: "context", moduleId: "vocabulary", title: "Word in context", blurb: "Слово по контексту", mechanic: "WORD IN CONTEXT", heading: "Определите слово по контексту", instruction: "По предложению с пропуском выберите английское слово.", whatToDo: "Найдите слово, которое подходит в это предложение.", hint: "Перевод появится после ответа. Пока опирайтесь на ситуацию в предложении.", questions: context },
+    { id: "context", moduleId: "vocabulary", title: "Word in context", blurb: "Слово по смыслу", mechanic: "WORD IN CONTEXT", heading: "Подберите подходящее по смыслу слово", instruction: "По предложению с пропуском выберите английское слово.", whatToDo: "Найдите слово, которое подходит в это предложение.", hint: "Перевод появится после ответа. Пока опирайтесь на ситуацию в предложении.", questions: context },
   ];
 }
 
@@ -238,7 +247,7 @@ function idiomActivities(): ActivityDef[] {
     id: `idiom-bit-${i}`,
     itemId: FATHER[i].id,
     prompt: b.lead,
-    detail: FATHER_TEXT,
+    detail: "Father and son",
     options: b.options,
     answer: b.answer,
     reveal: `${FATHER[i].english} — ${FATHER[i].definition}`,
@@ -272,7 +281,7 @@ function idiomActivities(): ActivityDef[] {
     lead: fatherLines[i] ?? g.english,
     options: optionsFor(g.english, FATHER.map((x) => x.english), 4, i + 2),
     answer: g.english,
-    reveal: `${g.definition} ${FATHER_TEXT}`,
+    reveal: g.definition,
   }));
   const sisterBits = [
     { prompt: "When my mother ______ to twins…", answer: "gave birth", item: "give-birth" },
@@ -300,6 +309,22 @@ function idiomActivities(): ActivityDef[] {
     answer: b.answer,
     reveal: SISTERS.find((s) => s.id === b.item)?.definition ?? "",
   }));
+  const synonymPairs = [
+    { id: "syn-inside", left: "know sth inside out", right: "know what you are talking about" },
+    { id: "syn-nothing", left: "nothing like sb/sth", right: "not anything like sb/sth" },
+    { id: "syn-bonds", left: "family bonds", right: "family ties" },
+    { id: "syn-knit", left: "close-knit", right: "tight-knit" },
+    { id: "syn-turns", left: "take turns", right: "take it in turns" },
+    { id: "syn-once", left: "at once", right: "straight away" },
+    { id: "syn-certain", left: "for certain", right: "for sure" },
+  ];
+  const synonymMatch: Question[] = chunk(synonymPairs, 3).map((group, i) => ({
+    kind: "match",
+    id: `syn-match-${i}`,
+    itemIds: group.map((g) => g.id),
+    prompt: "Соедините синонимы.",
+    pairs: group,
+  }));
   const stay: Question[] = SPOTLIGHT_STAY.items.map((s, i) => ({
     kind: "choice" as const,
     id: `stay-${s.id}`,
@@ -317,6 +342,7 @@ function idiomActivities(): ActivityDef[] {
     { id: "father", moduleId: "idioms", title: "Story · Father and son", blurb: "Текст по фрагментам", mechanic: "STORY", heading: "Продолжите историю", instruction: "Прочитайте фрагмент и выберите выражение, которое в нём используется.", whatToDo: "Выберите выражение, которое подходит по смыслу этого фрагмента.", hint: "В тексте отец и сын работают на семейной ферме.", questions: fatherStory },
     { id: "sisters", moduleId: "idioms", title: "Story · Sisters", blurb: "Story challenge", mechanic: "STORY", heading: "Продолжите историю", instruction: "В тексте Sisters пропущено выражение. Выберите его.", whatToDo: "Выберите выражение, которое подходит по смыслу.", hint: "История про двойняшек и их маму. Следите, кто действует.", questions: sistersStory },
     { id: "spotlight", moduleId: "idioms", title: "Spotlight", blurb: "stay out / stay in / stay up", mechanic: "CHOOSE", heading: "Выберите stay out, stay in или stay up", instruction: "Прочитайте объяснение и выберите подходящее выражение.", whatToDo: "Сопоставьте описание с одной из трёх фраз.", hint: "Out — не дома, in — дома, up — лечь спать позже обычного.", questions: stay },
+    { id: "synonyms", moduleId: "idioms", title: "Find the synonym", blurb: "Синонимы", mechanic: "FIND THE SYNONYM", heading: "Найдите синонимы", instruction: "Соедините выражения, которые в этом курсе даны как синонимы или как два варианта одной фразы.", whatToDo: "Соедините пару синонимов.", hint: "Ищите помету also или два варианта через косую черту.", questions: synonymMatch },
   ];
 }
 
@@ -452,19 +478,18 @@ function wordActivities(): ActivityDef[] {
     reveal: WORD_FAMILIES.find((w) => w.verb === row.answer)?.verbExample ?? row.answer,
   }));
   const builder: Question[] = WORD_FAMILIES.map((w) => ({
-    kind: "order" as const,
+    kind: "type" as const,
     id: `wb-build-${w.id}`,
     itemId: w.id,
     prompt: `${w.verb} → noun`,
-    tokens: w.noun.replace(/\s*\/\s*/g, " / ").split(/\s+/),
-    answer: w.noun.replace(/\s*\/\s*/g, " / ").split(/\s+/),
+    answers: w.noun.split("/").map((part) => part.trim().toLowerCase()),
     reveal: `${w.noun}. ${w.nounExample}`,
   }));
   return [
     { id: "transformer", moduleId: "word-building", title: "Word transformer", blurb: "Verb → noun", mechanic: "WORD BUILDING", heading: "Образуйте существительное", instruction: "Из данного глагола выберите существительное.", whatToDo: "Один вариант — форма существительного.", hint: "Ищите существительное, а не форму с -ing или -ed, если для этого глагола нужна другая форма.", questions: transformer },
     { id: "family", moduleId: "word-building", title: "Word family", blurb: "Соедините пару", mechanic: "MATCH", heading: "Соедините глагол и существительное", instruction: "Перетащите форму существительного к глаголу.", whatToDo: "Соедините глагол и существительное.", hint: "Суффиксы -tion, -ment и -al часто образуют существительное.", questions: match },
     { id: "complete", moduleId: "word-building", title: "Complete the sentence", blurb: "Предложения с пропуском", mechanic: "FILL THE GAP", heading: "Вставьте глагол", instruction: "Выберите глагол, который подходит в предложение.", whatToDo: "Вставьте глагол в пропуск.", hint: "После approve и disapprove часто стоит of.", questions: [...ex2, ...ex1] },
-    { id: "builder", moduleId: "word-building", title: "Word builder", blurb: "Соберите noun form", mechanic: "WORD BUILDING", heading: "Соберите форму существительного", instruction: "Нажимайте части в том порядке, в котором записана форма существительного.", whatToDo: "Соберите существительное к показанному глаголу.", hint: "Если форм две, между ними стоит косая черта.", questions: builder },
+    { id: "builder", moduleId: "word-building", title: "Word builder", blurb: "Напечатайте noun form", mechanic: "WORD BUILDING", heading: "Напечатайте форму существительного", instruction: "Введите существительное к этому глаголу.", whatToDo: "Напечатайте форму существительного.", hint: "Если в таблице две формы, подойдёт любая из них.", questions: builder },
   ];
 }
 

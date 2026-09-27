@@ -69,6 +69,7 @@ export function Player({
   const [tries, setTries] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [pending, setPending] = useState(false);
+  const [typed, setTyped] = useState("");
   const q = deck[step];
   const text = q ? (copy ?? copyFor(q)) : null;
 
@@ -88,6 +89,7 @@ export function Player({
     setTries(0);
     setShowHint(false);
     setPending(false);
+    setTyped("");
     if (q?.kind === "order") {
       setBank(q.tokens.map((t, i) => `${i}:${t}`));
       setOrder([]);
@@ -221,6 +223,33 @@ export function Player({
         {q.kind === "choice" || q.kind === "fill" || q.kind === "story" ? (
           <ChoiceBlock q={q} picked={picked} ok={ok} locked={pending} onPick={choose} />
         ) : null}
+        {q.kind === "type" ? (
+          <div>
+            <p className="en text-2xl" lang="en">{q.prompt}</p>
+            <input
+              className="mt-4 min-h-12 w-full rounded-2xl border border-stone-300 bg-white px-3"
+              value={typed}
+              disabled={ok !== null || pending}
+              onChange={(e) => setTyped(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter" || ok !== null) return;
+                const n = typed.trim().toLowerCase();
+                if (q.answers.includes(n)) grade(true, [q.itemId]);
+                else miss([q.itemId]);
+              }}
+              placeholder="Напечатайте существительное"
+              autoCapitalize="off"
+              autoCorrect="off"
+            />
+            {ok === null && !pending ? (
+              <button type="button" className="mt-4 min-h-12 rounded-full px-5 text-white" style={{ background: accent }} onClick={() => {
+                const n = typed.trim().toLowerCase();
+                if (q.answers.includes(n)) grade(true, [q.itemId]);
+                else miss([q.itemId]);
+              }}>Проверить</button>
+            ) : null}
+          </div>
+        ) : null}
         {q.kind === "match" ? (
           <MatchBlock
             q={q}
@@ -301,7 +330,7 @@ export function Player({
           </div>
         ) : null}
         {ok !== null ? (
-          <Feedback ok={ok} gain={gain} text={revealOf(q)} answer={q.kind === "order" ? q.answer.join(" ") : "answer" in q ? q.answer : ""} onNext={finishIfLast} accent={accent} flip={q.kind === "flip"} />
+          <Feedback ok={ok} gain={gain} text={revealOf(q)} answer={q.kind === "order" ? q.answer.join(" ") : q.kind === "type" ? q.answers.join(" / ") : "answer" in q ? q.answer : ""} onNext={finishIfLast} accent={accent} flip={q.kind === "flip"} />
         ) : null}
       </article>
     </section>
@@ -312,7 +341,7 @@ function revealOf(q: Question): string {
   if (q.kind === "match") return q.pairs.map((p) => `${p.left} — ${p.right}`).join(" · ");
   if (q.kind === "sort") return q.cards.map((c) => `${c.label} → ${c.bucket}`).join(" · ");
   if (q.kind === "flip") return q.back;
-  if (q.kind === "order") return q.reveal;
+  if (q.kind === "order" || q.kind === "type") return q.reveal;
   return q.reveal;
 }
 
@@ -321,13 +350,13 @@ function ChoiceBlock({ q, picked, ok, locked, onPick }: { q: Extract<Question, {
   const detail = "detail" in q ? q.detail : undefined;
   return (
     <div>
-      <h2 className="en text-3xl leading-tight sm:text-5xl">{prompt}</h2>
-      {detail ? <p className="mt-3 max-h-28 overflow-auto text-sm leading-relaxed text-stone-600">{detail}</p> : null}
+      <h2 className="en text-3xl leading-tight sm:text-5xl" lang="en" translate="no">{prompt}</h2>
+      {detail ? <p className="mt-3 max-h-28 overflow-auto text-sm leading-relaxed text-stone-600" lang="en" translate="no">{detail}</p> : null}
       <div className="mt-5 grid gap-2">
         {q.options.map((o, i) => {
           const state = ok === null ? "" : o === q.answer ? "bg-emerald-700 text-white" : o === picked ? "bg-rose-800 text-white" : "opacity-70";
           return (
-            <button key={`${o}-${i}`} type="button" disabled={ok !== null || locked} onClick={() => onPick(o)} className={`min-h-14 rounded-2xl border border-stone-200 bg-[#fffaf4] px-4 text-left text-base sm:text-lg ${state}`}>
+            <button key={`${o}-${i}`} type="button" disabled={ok !== null || locked} onClick={() => onPick(o)} className={`min-h-14 rounded-2xl border border-stone-200 bg-[#fffaf4] px-4 text-left text-base sm:text-lg ${state}`} lang="en" translate="no">
               <span className="mr-2 text-stone-400">{i + 1}</span>{o}
             </button>
           );
@@ -408,10 +437,16 @@ function SortBlock({ q, bucketPick, activeCard, setActiveCard, onDrop, locked }:
 function Feedback({ ok, gain, text, answer, onNext, accent, flip }: { ok: boolean; gain: number; text: string; answer: string; onNext: () => void; accent: string; flip: boolean }) {
   return (
     <div className={`mt-5 rounded-2xl p-4 ${ok ? "bg-emerald-50" : "bg-rose-50"}`}>
-      <div className="font-semibold">{ok ? "Правильно" : flip ? "Нужна практика" : "Попытки закончились"} {ok ? `+${gain} XP` : ""}</div>
-      <p className="mt-1 text-sm text-stone-700">{ok ? "Отлично. Вы выбрали верный ответ." : "Обратите внимание на значение."}</p>
-      {!ok && answer ? <p className="mt-2 text-sm"><span className="text-stone-500">Правильный ответ: </span><strong>{answer}</strong></p> : null}
-      <p className="mt-1 text-sm text-stone-700">{text}</p>
+      <div className="font-semibold">{ok ? "Правильно" : flip ? "Нужна подсказка" : "Попытки закончились"} {ok ? `+${gain} XP` : ""}</div>
+      {flip && !ok ? (
+        <p className="mt-2 text-lg">{text}</p>
+      ) : (
+        <>
+          <p className="mt-1 text-sm text-stone-700">{ok ? "Отлично. Вы выбрали верный ответ." : "Обратите внимание на значение."}</p>
+          {!ok && answer ? <p className="mt-2 text-sm"><span className="text-stone-500">Правильный ответ: </span><strong lang="en" translate="no">{answer}</strong></p> : null}
+          <p className="mt-1 text-sm text-stone-700" lang="en" translate="no">{text}</p>
+        </>
+      )}
       <button type="button" onClick={onNext} className="mt-3 min-h-12 rounded-full px-5 text-white" style={{ background: accent }}>Дальше</button>
     </div>
   );
