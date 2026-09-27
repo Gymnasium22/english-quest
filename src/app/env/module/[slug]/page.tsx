@@ -32,7 +32,11 @@ export default function EnvModulePage() {
           return (
             <li key={a.id}>
               <Link href={`/env/module/${mod.id}/${a.id}`} className="glass flex items-center justify-between gap-3 rounded-2xl px-4 py-4">
-                <span className="min-w-0"><span className="mr-2 text-sm" style={{ color: mod.accent }}>0{i + 1} ·</span><strong>{a.mechanic}</strong><span className="mt-1 block text-sm font-normal text-stone-700">{a.heading}</span><span className="mt-1 block text-sm text-stone-500">Вопросов: {a.questions.length}</span></span>
+                <span className="min-w-0">
+                  <span className="text-sm" style={{ color: mod.accent }}>0{i + 1} · {a.mechanic}</span>
+                  <span className="mt-1 block text-sm font-normal text-stone-700">{a.heading}</span>
+                  <span className="mt-1 block text-sm text-stone-500">Вопросов: {a.questions.length}</span>
+                </span>
                 <span className="shrink-0 text-sm">{done ? "Готово" : "Открыть"}</span>
               </Link>
             </li>

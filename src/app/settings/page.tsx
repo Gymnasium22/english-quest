@@ -22,7 +22,7 @@ export default function SettingsPage() {
         <p className="text-sm text-stone-600">Прогресс сохраняется в этом браузере.</p>
         {ask ? (
           <div className="rounded-2xl bg-rose-50 p-3 text-sm">
-            Сбросить XP, серии, задания и награды?
+            Сбросить прогресс Family и Environmental Issues? Имя сохранится.
             <div className="mt-3 flex gap-2">
               <button type="button" className="min-h-11 rounded-full bg-stone-900 px-4 text-white" onClick={() => { reset(); setAsk(false); }}>Сбросить</button>
               <button type="button" className="min-h-11 rounded-full border border-stone-300 px-4" onClick={() => setAsk(false)}>Отмена</button>

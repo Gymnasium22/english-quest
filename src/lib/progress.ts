@@ -155,13 +155,22 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const f = loadKey(KEY1);
     const e = loadKey(KEY2);
     const stored = (localStorage.getItem(CURRENT) as QuestUnit) || "unit1";
-    const next = pathUnit(path, stored);
-    if (path.startsWith("/unit/family")) localStorage.setItem(CURRENT, "unit1");
-    if (path.startsWith("/unit/environmental") || path.startsWith("/env")) localStorage.setItem(CURRENT, "unit2");
     setFamily(f);
     setEnv(e);
-    setCurrentUnit(next);
+    setCurrentUnit(pathUnit(path, stored));
     setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (path.startsWith("/unit/environmental") || path.startsWith("/env")) {
+      localStorage.setItem(CURRENT, "unit2");
+      setCurrentUnit("unit2");
+      return;
+    }
+    if (path.startsWith("/unit/family") || path.startsWith("/module") || path === "/final") {
+      localStorage.setItem(CURRENT, "unit1");
+      setCurrentUnit("unit1");
+    }
   }, [path]);
 
   useEffect(() => {
@@ -254,7 +263,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
           return next;
         }),
       setCursor: (key, step) => setState((s) => ({ ...s, cursors: { ...s.cursors, [key]: step } })),
-      reset: () => setState(empty()),
+      reset: () => {
+        setFamily((s) => ({ ...empty(), name: s.name, reduceMotion: s.reduceMotion }));
+        setEnv((s) => ({ ...empty(), name: s.name, reduceMotion: s.reduceMotion }));
+      },
       finalReady: list.every((m) => actsFor(currentUnit, m.id).some((a) => state.completed.includes(`${m.id}/${a.id}`))),
       tasksLeftForFinal: list.filter((m) => !actsFor(currentUnit, m.id).some((a) => state.completed.includes(`${m.id}/${a.id}`))).length,
       moduleProgress,
