@@ -232,15 +232,15 @@ function idiomActivities(): ActivityDef[] {
   }));
   const fatherBits: { lead: string; answer: string; options: string[] }[] = [
     { lead: "I ______ after my father.", answer: "take", options: ["take", "run", "look", "follow"] },
-    { lead: "We're both tall — that ______ in the family.", answer: "runs", options: ["runs", "takes", "brings", "shows"] },
-    { lead: "I was ______ up on a farm.", answer: "brought", options: ["brought", "looked", "followed", "shown"] },
+    { lead: "We're both tall - that ______ in the family - and we both have a passion for the outdoor life.", answer: "runs", options: ["runs", "takes", "brings", "shows"] },
+    { lead: "I was ______ up on a farm and always looked up to my father.", answer: "brought", options: ["brought", "looked", "followed", "shown"] },
     { lead: "I always ______ up to my father.", answer: "looked", options: ["looked", "took", "ran", "followed"] },
-    { lead: "I followed in his ______.", answer: "footsteps", options: ["footsteps", "blood", "ropes", "view"] },
-    { lead: "Farming is in my ______.", answer: "blood", options: ["blood", "ropes", "view", "life"] },
-    { lead: "It's been our ______ of life for five generations.", answer: "way", options: ["way", "point", "blood", "rope"] },
-    { lead: "He knows the business ______ out.", answer: "inside", options: ["inside", "after", "up", "into"] },
-    { lead: "He enjoys showing me the ______.", answer: "ropes", options: ["ropes", "footsteps", "blood", "view"] },
-    { lead: "From his ______ of view…", answer: "point", options: ["point", "way", "blood", "rope"] },
+    { lead: "so it was no surprise when I followed in his ______ and joined him on the family farm.", answer: "footsteps", options: ["footsteps", "blood", "ropes", "view"] },
+    { lead: "Basically farming is in my ______, and it's been our way of life for five generations.", answer: "blood", options: ["blood", "ropes", "view", "life"] },
+    { lead: "and it's been our ______ of life for five generations.", answer: "way", options: ["way", "point", "blood", "rope"] },
+    { lead: "He knows the business ______ out, and enjoys showing me the ropes.", answer: "inside", options: ["inside", "after", "up", "into"] },
+    { lead: "and enjoys showing me the ______.", answer: "ropes", options: ["ropes", "footsteps", "blood", "view"] },
+    { lead: "And from his ______ of view, he likes to have someone younger with new ideas - even if they aren't that good!", answer: "point", options: ["point", "way", "blood", "rope"] },
   ];
   const complete: Question[] = fatherBits.map((b, i) => ({
     kind: "choice",
@@ -264,15 +264,15 @@ function idiomActivities(): ActivityDef[] {
   }));
   const fatherLines = [
     "I ______ my father.",
-    "We're both tall — that ______.",
-    "I was ______ on a farm.",
-    "I always ______ my father.",
-    "I ______ and joined him on the family farm.",
-    "Basically farming is ______.",
-    "It's been our ______ for five generations.",
-    "He ______ the business.",
-    "He enjoys ______.",
-    "And from his ______, he likes to have someone younger with new ideas.",
+    "We're both tall - that ______ - and we both have a passion for the outdoor life.",
+    "I was ______ on a farm and always looked up to my father.",
+    "and always ______ my father.",
+    "so it was no surprise when I ______ and joined him on the family farm.",
+    "Basically farming is ______, and it's been our way of life for five generations.",
+    "and it's been ______ for five generations.",
+    "He ______, and enjoys showing me the ropes.",
+    "and enjoys ______.",
+    "And from his ______, he likes to have someone younger with new ideas - even if they aren't that good!",
   ];
   const fatherStory: Question[] = FATHER.map((g, i) => ({
     kind: "story",
@@ -284,15 +284,15 @@ function idiomActivities(): ActivityDef[] {
     reveal: g.definition,
   }));
   const sisterBits = [
-    { prompt: "When my mother ______ to twins…", answer: "gave birth", item: "give-birth" },
-    { prompt: "…she knew what she was ______ .", answer: "letting herself in for", item: "let-yourself-in" },
-    { prompt: "Although I'm ______ Elle…", answer: "nothing like", item: "nothing-like" },
-    { prompt: "I got ______ by hiding her favourite doll.", answer: "my own back", item: "own-back" },
-    { prompt: "She always ______ when I did that.", answer: "burst into tears", item: "burst-into-tears" },
-    { prompt: "We ______ even more difficult teenagers.", answer: "grew into", item: "grow-into" },
-    { prompt: "We were always ______ at school.", answer: "getting into trouble", item: "get-into-trouble" },
-    { prompt: "Our poor mother tried to ______ to some of our behaviour.", answer: "turn a blind eye", item: "blind-eye" },
-    { prompt: "Then, by some miracle, we ______.", answer: "grew up", item: "grow-up" },
+    { prompt: "When my mother ______ to twins, I don't suppose she knew what she was letting herself in for.", answer: "gave birth", item: "give-birth" },
+    { prompt: "I don't suppose she knew what she was ______.", answer: "letting herself in for", item: "let-yourself-in" },
+    { prompt: "Although I'm ______ Elle, we were equally horrible.", answer: "nothing like", item: "nothing-like" },
+    { prompt: "I got ______ by hiding her favourite doll; she always burst into tears when I did that.", answer: "my own back", item: "own-back" },
+    { prompt: "she always ______ when I did that.", answer: "burst into tears", item: "burst-into-tears" },
+    { prompt: "And then we ______ even more difficult teenagers.", answer: "grew into", item: "grow-into" },
+    { prompt: "We stayed out late, and were always ______ at school for smoking, wearing make-up, or just being lazy.", answer: "getting into trouble", item: "get-into-trouble" },
+    { prompt: "Our poor mother tried to ______ to some of our behaviour, but it wasn't easy.", answer: "turn a blind eye", item: "blind-eye" },
+    { prompt: "Then, by some miracle, we ______. We're both quite nice now!", answer: "grew up", item: "grow-up" },
   ];
   const sistersStory: Question[] = sisterBits.map((b, i) => ({
     kind: "choice" as const,
