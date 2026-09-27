@@ -39,6 +39,7 @@ export function Player({
   copy,
   nextHref,
   onReplay,
+  moduleList,
 }: {
   title: string;
   questions: Question[];
@@ -50,7 +51,9 @@ export function Player({
   copy?: Copy;
   nextHref?: string;
   onReplay?: () => void;
+  moduleList?: readonly { id: string; title: string }[];
 }) {
+  const list = moduleList ?? MODULES;
   const { record, completeActivity, completeFinal, setCursor, state, ready, practiceIds, masteredIds, moduleProgress } = useProgress();
   const [deck, setDeck] = useState<Question[]>(questions);
   const mixed = useRef(false);
@@ -192,7 +195,7 @@ export function Player({
     return (
       <section className="glass rise rounded-3xl p-6 sm:p-10">
         <p className="text-xs tracking-[0.2em] text-stone-500">ГОТОВО</p>
-        <h2 className="mt-2 text-4xl">{finalMode ? "Unit 1 пройден" : title}</h2>
+        <h2 className="mt-2 text-4xl">{finalMode ? "Юнит пройден" : title}</h2>
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl bg-white/80 p-4"><div className="text-xs text-stone-500">XP за серию</div><div className="text-3xl">+{gained}</div></div>
           <div className="rounded-2xl bg-white/80 p-4"><div className="text-xs text-stone-500">Точность</div><div className="text-3xl">{accuracy}%</div></div>
@@ -202,10 +205,10 @@ export function Player({
           <div className="mt-4 grid gap-3">
             <p className="text-sm text-stone-700">Нужно повторить: {practiceIds.length}. Уже получается: {masteredIds.length}.</p>
             <ul className="grid gap-2">
-              {MODULES.map((m) => (
+              {list.map((m) => (
                 <li key={m.id} className="flex items-center justify-between text-sm">
                   <span>{m.title}</span>
-                  <span>{moduleProgress(m.id)}%</span>
+                  <span>{moduleProgress(m.id as "vocabulary")}%</span>
                 </li>
               ))}
             </ul>

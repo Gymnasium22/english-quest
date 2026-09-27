@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ACHIEVEMENTS, useProgress } from "@/lib/progress";
+import { ACHIEVEMENTS, ACHIEVEMENTS_ENV, useProgress } from "@/lib/progress";
 
 const links = [
   { href: "/", label: "Карта" },
@@ -15,9 +15,9 @@ const links = [
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
-  const inTask = /^\/module\/[^/]+\/[^/]+/.test(path);
+  const inTask = /^\/(env\/)?module\/[^/]+\/[^/]+/.test(path);
   const menu = inTask ? links.filter((l) => l.href !== "/glossary") : links;
-  const { state, ready } = useProgress();
+  const { state, ready, headerXp, currentUnit } = useProgress();
   const [toast, setToast] = useState<string | null>(null);
   const seen = useRef<string[] | null>(null);
   useEffect(() => {
@@ -29,7 +29,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     const fresh = state.achievements.find((id) => !seen.current?.includes(id));
     seen.current = state.achievements;
     if (!fresh) return;
-    const item = ACHIEVEMENTS.find((a) => a.id === fresh);
+    const item = [...ACHIEVEMENTS, ...ACHIEVEMENTS_ENV].find((a) => a.id === fresh);
     setToast(item ? `${item.title}. ${item.text}` : fresh);
     const timer = window.setTimeout(() => setToast(null), 4200);
     return () => window.clearTimeout(timer);
@@ -38,8 +38,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <div className="nav-safe mx-auto min-h-screen w-full max-w-6xl px-4 pt-4 sm:px-6">
       <header className="glass rise mb-5 flex items-center justify-between gap-3 rounded-3xl px-4 py-3 sm:px-5">
         <Link href="/" className="min-w-0">
-          <div className="text-[11px] tracking-[0.22em] text-stone-500">UNIT 1</div>
-          <div className="display truncate text-xl leading-none sm:text-2xl">FAMILY</div>
+          <div className="text-[11px] tracking-[0.22em] text-stone-500">{currentUnit === "unit2" ? "UNIT 2" : "UNIT 1"}</div>
+          <div className="display truncate text-xl leading-none sm:text-2xl">{currentUnit === "unit2" ? "NATURE" : "FAMILY"}</div>
           <div className="-mt-0.5 text-sm text-stone-600">English Quest</div>
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
@@ -48,7 +48,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
         <div className="flex items-center gap-2 text-sm">
-          <Stat label="XP" value={String(state.xp)} />
+          <Stat label="XP" value={String(headerXp)} />
           <Stat label="Лучшая серия" value={String(state.bestStreak)} />
           <Link href="/settings" className="grid h-11 w-11 place-items-center rounded-2xl bg-stone-900 text-sm text-[#f4efe6]" aria-label="Настройки">
             {state.name.slice(0, 1).toUpperCase()}
@@ -84,11 +84,13 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function TopBar({ title, meta }: { title: string; meta?: string }) {
+export function TopBar({ title, meta, backHref }: { title: string; meta?: string; backHref?: string }) {
+  const path = usePathname();
+  const back = backHref ?? (path.startsWith("/env") || path.startsWith("/unit/environmental") ? "/unit/environmental" : path.startsWith("/module") || path.startsWith("/unit/family") ? "/unit/family" : "/");
   return (
     <div className="mb-4 flex items-end justify-between gap-3">
       <div>
-        <Link href="/" className="text-sm text-stone-600 underline-offset-4 hover:underline">← Назад</Link>
+        <Link href={back} className="text-sm text-stone-600 underline-offset-4 hover:underline">← Назад</Link>
         <h1 className="mt-1 text-3xl sm:text-4xl">{title}</h1>
       </div>
       {meta ? <div className="text-sm text-stone-600">{meta}</div> : null}
