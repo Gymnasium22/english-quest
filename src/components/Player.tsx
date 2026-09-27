@@ -56,6 +56,7 @@ export function Player({
   const [rest, setRest] = useState(false);
   const [session, setSession] = useState({ asked: 0, correct: 0 });
   const startXp = useRef<number | null>(null);
+  const answered = useRef(false);
   const [picked, setPicked] = useState<string | null>(null);
   const [ok, setOk] = useState<boolean | null>(null);
   const [gain, setGain] = useState(0);
@@ -90,6 +91,7 @@ export function Player({
     setShowHint(false);
     setPending(false);
     setTyped("");
+    answered.current = false;
     if (q?.kind === "order") {
       setBank(q.tokens.map((t, i) => `${i}:${t}`));
       setOrder([]);
@@ -111,6 +113,8 @@ export function Player({
   const finished = step >= deck.length;
 
   function grade(correct: boolean, ids: string[], practice?: boolean) {
+    if (answered.current) return;
+    answered.current = true;
     const combo = correct ? state.combo + 1 : 0;
     const bonus = correct && combo > 0 && combo % 3 === 0 ? 5 : 0;
     record(ids, correct, practice);
@@ -282,10 +286,12 @@ export function Player({
                 </div>
               </div>
             </button>
+            {ok === null ? (
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
-              <button type="button" className="min-h-12 rounded-2xl bg-stone-900 text-[#f4efe6]" onClick={() => { grade(true, [q.itemId], false); }}>Знаю</button>
-              <button type="button" className="min-h-12 rounded-2xl border border-stone-300" onClick={() => { grade(false, [q.itemId], true); }}>Нужно повторить</button>
+              <button type="button" className="min-h-12 rounded-2xl bg-stone-900 text-[#f4efe6]" onClick={() => grade(true, [q.itemId], false)}>Знаю</button>
+              <button type="button" className="min-h-12 rounded-2xl border border-stone-300" onClick={() => grade(false, [q.itemId], true)}>Нужно повторить</button>
             </div>
+            ) : null}
           </div>
         ) : null}
         {q.kind === "order" ? (
