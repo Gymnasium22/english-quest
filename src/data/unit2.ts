@@ -167,6 +167,212 @@ export const ENV_FAMILIES = [
   { id: "wild", base: "wild", members: ["wilderness", "wildlife", "wildly"] },
 ];
 
+export type NatureForm = { english: string; ru: string };
+export type NatureExample = { text: string; gap: string };
+export type NatureFamily = { id: string; base: string; forms: NatureForm[]; examples: NatureExample[] };
+
+export const ENV_NATURE_WB: NatureFamily[] = [
+  {
+    id: "nb-bear", base: "bear",
+    forms: [{ english: "unbearable", ru: "невыносимый" }, { english: "unbearably", ru: "невыносимо" }],
+    examples: [
+      { text: "The summer heat becomes unbearable when temperatures exceed 40 degrees Celsius.", gap: "unbearable" },
+      { text: "The water in the mountain lake was unbearably cold for swimming.", gap: "unbearably" },
+    ],
+  },
+  {
+    id: "nb-biology", base: "biology",
+    forms: [{ english: "biologist", ru: "биолог" }, { english: "biological", ru: "биологический" }],
+    examples: [
+      { text: "A marine biologist studies ocean life.", gap: "biologist" },
+      { text: "Climate change threatens biological diversity in ecosystems.", gap: "biological" },
+    ],
+  },
+  {
+    id: "nb-change", base: "change",
+    forms: [{ english: "changeable", ru: "переменчивый" }, { english: "unchangeable", ru: "неизменный" }, { english: "unchanged", ru: "неизменившийся" }],
+    examples: [
+      { text: "British weather is famously changeable.", gap: "changeable" },
+      { text: "The laws of physics are unchangeable, governing how everything in nature works.", gap: "unchangeable" },
+      { text: "The ancient forest has remained unchanged for centuries.", gap: "unchanged" },
+    ],
+  },
+  {
+    id: "nb-chemist", base: "chemist",
+    forms: [{ english: "chemist", ru: "химик" }, { english: "chemical", ru: "химический" }, { english: "chemicals", ru: "химикат" }],
+    examples: [
+      { text: "Chemists study ice cores to learn about Earth’s climate a few thousand years ago.", gap: "Chemists" },
+      { text: "Farmers should avoid using harsh chemical pesticides.", gap: "chemical" },
+      { text: "Many countries banned certain chemicals that were destroying the ozone layer.", gap: "chemicals" },
+    ],
+  },
+  {
+    id: "nb-consider", base: "consider",
+    forms: [{ english: "consideration", ru: "рассмотрение, внимание" }, { english: "considerable", ru: "значительный" }, { english: "considerably", ru: "значительно" }],
+    examples: [
+      { text: "Climate change requires serious consideration from every government around the world.", gap: "consideration" },
+      { text: "A considerable amount of ice melts in the Arctic every summer.", gap: "considerable" },
+      { text: "Global temperatures have risen considerably over the last years.", gap: "considerably" },
+    ],
+  },
+  {
+    id: "nb-consume", base: "consume",
+    forms: [{ english: "consumer", ru: "потребитель" }, { english: "consumption", ru: "потребление" }],
+    examples: [
+      { text: "As a consumer, you can choose products that don’t harm the environment.", gap: "consumer" },
+      { text: "Water consumption increases dramatically during hot summer months.", gap: "consumption" },
+    ],
+  },
+  {
+    id: "nb-diverse", base: "diverse",
+    forms: [{ english: "diversity", ru: "разнообразие" }],
+    examples: [{ text: "The Amazon Rainforest is famous for its incredible diversity of plants and animals.", gap: "diversity" }],
+  },
+  {
+    id: "nb-ecology", base: "ecology",
+    forms: [
+      { english: "ecologist", ru: "эколог" },
+      { english: "ecological", ru: "экологический" },
+      { english: "ecologically", ru: "экологически" },
+      { english: "environmentally", ru: "экологически" },
+      { english: "environmentalist", ru: "защитник окружающей среды" },
+    ],
+    examples: [
+      { text: "Ecologists study how animals interact with their environment and other species.", gap: "Ecologists" },
+      { text: "Plastic pollution is a major ecological disaster threatening the planet.", gap: "ecological" },
+      { text: "Solar panels are ecologically friendly because they produce clean energy without pollution.", gap: "ecologically" },
+      { text: "Every environmentalist agrees that we must reduce plastic waste.", gap: "environmentalist" },
+    ],
+  },
+  {
+    id: "nb-evolve", base: "evolve",
+    forms: [{ english: "evolution", ru: "эволюция" }],
+    examples: [{ text: "Darwin’s theory of evolution explains how species adapt to their environment over time.", gap: "evolution" }],
+  },
+  {
+    id: "nb-expect", base: "expect",
+    forms: [{ english: "expectation", ru: "ожидание" }, { english: "unexpectedly", ru: "неожиданно" }],
+    examples: [
+      { text: "Contrary to all expectations, the storm passed quickly.", gap: "expectations" },
+      { text: "The volcano erupted unexpectedly, sending ash high into the atmosphere.", gap: "unexpectedly" },
+    ],
+  },
+  {
+    id: "nb-explore", base: "explore",
+    forms: [{ english: "explorer", ru: "исследователь" }, { english: "exploration", ru: "исследование" }, { english: "unexplored", ru: "неисследованный" }],
+    examples: [
+      { text: "Early explorers used the stars to navigate across vast oceans.", gap: "explorers" },
+      { text: "Space exploration helps us understand Earth’s climate by observing it from above.", gap: "exploration" },
+      { text: "Vast areas of the deep ocean remain unexplored and full of mysterious creatures.", gap: "unexplored" },
+    ],
+  },
+  {
+    id: "nb-favour", base: "favour",
+    forms: [{ english: "favourable", ru: "благоприятный" }, { english: "unfavourable", ru: "неблагоприятный" }],
+    examples: [
+      { text: "Spring brings favourable temperatures for planting vegetables.", gap: "favourable" },
+      { text: "Crop harvests were poor this year due to unfavourable weather in summer.", gap: "unfavourable" },
+    ],
+  },
+  {
+    id: "nb-geography", base: "geography",
+    forms: [{ english: "geographer", ru: "географ" }, { english: "geographical", ru: "географический" }],
+    examples: [
+      { text: "Our school geographer explained why deserts form near certain mountain ranges.", gap: "geographer" },
+      { text: "Due to the geographical position of Belarus, its climate is moderate.", gap: "geographical" },
+    ],
+  },
+  {
+    id: "nb-humid", base: "humid",
+    forms: [{ english: "humidity", ru: "влажность" }],
+    examples: [{ text: "Low humidity in winter causes our skin to become dry.", gap: "humidity" }],
+  },
+  {
+    id: "nb-like", base: "like",
+    forms: [{ english: "unlike", ru: "в отличие от" }, { english: "unlikely", ru: "маловероятный" }],
+    examples: [
+      { text: "Unlike most birds, penguins cannot fly but swim very well.", gap: "Unlike" },
+      { text: "Polar bears are unlikely to survive without Arctic ice protection.", gap: "unlikely" },
+    ],
+  },
+  {
+    id: "nb-locate", base: "locate",
+    forms: [{ english: "locate", ru: "определить местонахождение" }, { english: "location", ru: "местоположение" }],
+    examples: [
+      { text: "Migrating birds use the stars to locate their position during night flights.", gap: "locate" },
+      { text: "GPS technology helps hikers pinpoint their exact location in the wild.", gap: "location" },
+    ],
+  },
+  {
+    id: "nb-mass", base: "mass",
+    forms: [{ english: "massive", ru: "массивный" }],
+    examples: [{ text: "A massive iceberg broke away from the glacier and drifted into the open ocean.", gap: "massive" }],
+  },
+  {
+    id: "nb-nature", base: "nature",
+    forms: [{ english: "unnatural", ru: "неестественный" }, { english: "naturally", ru: "естественно" }],
+    examples: [
+      { text: "The bright green colour of the river looked unnatural.", gap: "unnatural" },
+      { text: "Pine trees grow naturally in this area.", gap: "naturally" },
+    ],
+  },
+  {
+    id: "nb-new", base: "new",
+    forms: [{ english: "renew", ru: "возобновлять" }, { english: "renewable", ru: "возобновляемый" }],
+    examples: [
+      { text: "Spring is the time when plants renew their leaves and flowers after winter.", gap: "renew" },
+      { text: "Solar and wind power are renewable energy sources that never run out.", gap: "renewable" },
+    ],
+  },
+  {
+    id: "nb-observe", base: "observe",
+    forms: [{ english: "observer", ru: "наблюдатель" }, { english: "observation", ru: "наблюдение" }],
+    examples: [
+      { text: "An experienced bird observer can identify species just by listening to their songs.", gap: "observer" },
+      { text: "Detailed observation of the stars helped ancient sailors navigate across the open ocean.", gap: "observation" },
+    ],
+  },
+  {
+    id: "nb-poison", base: "poison",
+    forms: [{ english: "poisonous", ru: "ядовитый" }],
+    examples: [{ text: "Many poisonous mushrooms look similar to edible ones.", gap: "poisonous" }],
+  },
+  {
+    id: "nb-predict", base: "predict",
+    forms: [{ english: "prediction", ru: "предсказание, прогноз" }, { english: "predictable", ru: "предсказуемый" }, { english: "unpredictable", ru: "непредсказуемый" }],
+    examples: [
+      { text: "The weather prediction for tomorrow suggests heavy snow.", gap: "prediction" },
+      { text: "Tides are predictable because they follow the moon’s cycle.", gap: "predictable" },
+      { text: "Wild animals can be unpredictable, so keep a safe distance when observing them.", gap: "unpredictable" },
+    ],
+  },
+  {
+    id: "nb-sustain", base: "sustain",
+    forms: [{ english: "sustainable", ru: "устойчивый (экологически)" }, { english: "sustainability", ru: "устойчивость, экологичность" }],
+    examples: [
+      { text: "Organic farming is a more sustainable way to produce food without damaging soil.", gap: "sustainable" },
+      { text: "Environmental sustainability means using resources carefully so that future generations can survive as well.", gap: "sustainability" },
+    ],
+  },
+  {
+    id: "nb-thick", base: "thick",
+    forms: [{ english: "thickness", ru: "толщина" }, { english: "thicken", ru: "сгущаться, утолщаться" }, { english: "thickly", ru: "густо, плотно" }],
+    examples: [
+      { text: "The thickness of the ice on the lake determines if it is safe for skating.", gap: "thickness" },
+      { text: "Fur coats on animals thicken in autumn to prepare them for the cold winter.", gap: "thicken" },
+      { text: "Trees grow thickly in the rainforest and block most sunlight from reaching the ground.", gap: "thickly" },
+    ],
+  },
+  {
+    id: "nb-wide", base: "wide",
+    forms: [{ english: "widen", ru: "расширять(ся)" }, { english: "widely", ru: "широко" }],
+    examples: [
+      { text: "Cracks in the ice shelf continue to widen due to global warming.", gap: "widen" },
+      { text: "Solar panels are widely used in sunny countries to generate clean, cheap electricity.", gap: "widely" },
+    ],
+  },
+];
+
 export const RAIN_SCALE = ["shower", "heavy rain", "pour down / downpour", "torrential rain", "flood"];
 
 export const ENV_MODULES = [
@@ -174,7 +380,7 @@ export const ENV_MODULES = [
   { id: "idioms", title: "Idioms & Phrasal Verbs", kicker: "Идиомы удачи, риска и природы", href: "/env/module/idioms", tone: "blue", accent: "#2C4C7C", wash: "#E4EAF3", countLabel: "22 выражения" },
   { id: "collocations", title: "Collocations", kicker: "Устойчивые сочетания", href: "/env/module/collocations", tone: "plum", accent: "#5C3D6E", wash: "#EFE6F3", countLabel: "38 сочетаний" },
   { id: "prepositions", title: "Prepositional Phrases", kicker: "Предложные выражения", href: "/env/module/prepositions", tone: "green", accent: "#3E6B4F", wash: "#E5F0E8", countLabel: "14 фраз" },
-  { id: "word-building", title: "Word Building", kicker: "Семьи слов", href: "/env/module/word-building", tone: "burgundy", accent: "#8E3A3A", wash: "#F6E4E2", countLabel: "20 семей" },
+  { id: "word-building", title: "Word Building", kicker: "Семьи слов", href: "/env/module/word-building", tone: "burgundy", accent: "#8E3A3A", wash: "#F6E4E2", countLabel: "45 семей" },
 ] as const;
 
 export type EnvModuleId = (typeof ENV_MODULES)[number]["id"];

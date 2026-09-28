@@ -1,6 +1,7 @@
 import {
   ENV_COLLOS,
   ENV_FAMILIES,
+  ENV_NATURE_WB,
   ENV_IDIOMS,
   ENV_PHRASALS,
   ENV_PREP,
@@ -140,8 +141,8 @@ function idiomActs(): ActivityDef[] {
     { kind: "choice", id: "br-rain", itemId: "come-rain-or-shine", prompt: "come rain or ______", options: ["shine", "wind", "luck", "flood"], answer: "shine", reveal: "come rain or shine" },
     { kind: "choice", id: "br-wood", itemId: "touch-wood", prompt: "touch ______", options: ["wood", "luck", "nature", "rain"], answer: "wood", reveal: "touch wood" },
     { kind: "choice", id: "br-blue", itemId: "out-of-the-blue", prompt: "out of the ______", options: ["blue", "rain", "luck", "wild"], answer: "blue", reveal: "out of the blue" },
-    { kind: "choice", id: "br-straw", itemId: "draw-the-short-straw", prompt: "draw the short ______", options: ["straw", "luck", "stick", "row"], answer: "straw", reveal: "draw the short straw" },
-    { kind: "choice", id: "br-fingers", itemId: "have-green-fingers", prompt: "have green ______", options: ["fingers", "hands", "luck", "thumbs"], answer: "fingers", reveal: "have green fingers" },
+    { kind: "choice", id: "br-straw", itemId: "draw-the-short-straw", prompt: "draw the short ______", options: ["straw", "luck", "rain", "wood"], answer: "straw", reveal: "draw the short straw" },
+    { kind: "choice", id: "br-fingers", itemId: "have-green-fingers", prompt: "have green ______", options: ["fingers", "luck", "rain", "wood"], answer: "fingers", reveal: "have green fingers" },
   ];
   const storyBits = [
     { id: "start-off", prompt: "The day will ______ with a bit of sunshine.", answer: "start off", options: ["start off", "die out", "pick up", "cloud over"] },
@@ -246,6 +247,26 @@ function prepActs(): ActivityDef[] {
   ];
 }
 
+function naturePool(): string[] {
+  return ENV_NATURE_WB.flatMap((f) => f.forms.map((x) => x.english));
+}
+
+function natureOptions(correct: string, family: string[], seed: number): string[] {
+  const same = [...new Set(family.filter((x) => x.toLowerCase() !== correct.toLowerCase()))];
+  const others = naturePool().filter((x) => x.toLowerCase() !== correct.toLowerCase() && !family.some((f) => f.toLowerCase() === x.toLowerCase()));
+  const fromSame = shuffle(same, seed).slice(0, 2);
+  const fromOther = shuffle(others, seed + 4).slice(0, Math.max(1, 3 - fromSame.length));
+  return shuffle([correct, ...fromSame, ...fromOther].slice(0, 4), seed + 9);
+}
+
+function blankNature(example: string, gap: string): { before: string; after: string } | null {
+  const escaped = gap.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`\\b${escaped}\\b`);
+  const idx = example.search(re);
+  if (idx < 0) return null;
+  return { before: example.slice(0, idx), after: example.slice(idx + gap.length) };
+}
+
 function wordActs(): ActivityDef[] {
   const pick: Question[] = ENV_FAMILIES.map((f, i) => ({
     kind: "choice" as const,
@@ -270,10 +291,56 @@ function wordActs(): ActivityDef[] {
     { kind: "type", id: "t-occur", itemId: "occur", prompt: "occur → существительное", answers: ["occurrence"], reveal: "occurrence" },
     { kind: "type", id: "t-risk", itemId: "risk", prompt: "risk → прилагательное", answers: ["risky"], reveal: "risky" },
   ];
+  const natureGap: Question[] = ENV_NATURE_WB.flatMap((f, fi) =>
+    f.examples.flatMap((ex, ei) => {
+      const gap = blankNature(ex.text, ex.gap);
+      if (!gap) return [];
+      const family = f.forms.map((x) => x.english);
+      return [{
+        kind: "choice" as const,
+        id: `nb-gap-${f.id}-${ei}`,
+        itemId: f.id,
+        prompt: `${gap.before}______${gap.after}`,
+        options: natureOptions(ex.gap, family, fi * 11 + ei + 3),
+        answer: ex.gap,
+        reveal: ex.text,
+      }];
+    }),
+  );
+  const natureForm: Question[] = ENV_NATURE_WB.flatMap((f, fi) =>
+    f.forms.map((form, i) => ({
+      kind: "choice" as const,
+      id: `nb-form-${f.id}-${form.english}`,
+      itemId: f.id,
+      prompt: f.base,
+      detail: form.ru,
+      options: natureOptions(form.english, f.forms.map((x) => x.english), fi * 7 + i + 5),
+      answer: form.english,
+      reveal: `${f.base} → ${form.english} — ${form.ru}`,
+    })),
+  );
+  const natureOdd: Question[] = ENV_NATURE_WB.filter((f) => f.forms.length >= 2).map((f, i) => {
+    const members = f.forms.map((x) => x.english);
+    const outsider = shuffle(naturePool().filter((x) => !members.includes(x)), i + 8)[0];
+    const keep = shuffle(members, i + 2).slice(0, 3);
+    return {
+      kind: "choice" as const,
+      id: `nb-odd-${f.id}`,
+      itemId: f.id,
+      prompt: f.base,
+      detail: "Какая форма не от этой основы?",
+      options: shuffle([...keep, outsider], i + 12),
+      answer: outsider,
+      reveal: `${f.base}: ${members.join(", ")}`,
+    };
+  });
   return [
     { id: "form", moduleId: "word-building", title: "Form", blurb: "", mechanic: "WORD BUILDING", heading: "Выберите форму от основы", instruction: "Дана основа. Выберите слово из её семьи.", whatToDo: "", hint: "Не выбирайте occure — такой формы нет.", questions: pick },
     { id: "error", moduleId: "word-building", title: "Error", blurb: "", mechanic: "CHOOSE", heading: "Найдите ошибку в образовании", instruction: "Выберите неверную форму или верного члена семьи, как сказано в вопросе.", whatToDo: "", hint: "occur пишется без e на конце основы в occur.", questions: error },
     { id: "type", moduleId: "word-building", title: "Type", blurb: "", mechanic: "WORD BUILDING", heading: "Напечатайте форму", instruction: "Введите нужную форму от основы.", whatToDo: "", hint: "ecology → ecologist; extinct → extinction.", questions: type },
+    { id: "nature-gap", moduleId: "word-building", title: "Nature forms", blurb: "", mechanic: "FILL THE GAP", heading: "Вставьте форму в предложение", instruction: "Выберите форму, которая подходит в пример.", whatToDo: "", hint: "Смотрите на основу семьи и на слова вокруг пропуска.", questions: natureGap },
+    { id: "nature-form", moduleId: "word-building", title: "Nature family", blurb: "", mechanic: "WORD BUILDING", heading: "Выберите форму по основе", instruction: "Дана основа. Выберите форму с нужным значением.", whatToDo: "", hint: "Русская подпись — значение формы, не подсказка всей семьи.", questions: natureForm },
+    { id: "nature-odd", moduleId: "word-building", title: "Odd form", blurb: "", mechanic: "CHOOSE", heading: "Найдите лишнюю форму", instruction: "Выберите слово, которое не относится к этой основе.", whatToDo: "", hint: "Три формы от одной основы, одна — от другой.", questions: natureOdd },
   ];
 }
 
@@ -329,6 +396,8 @@ export function envItemLabel(id: string): string {
   if (p) return p.english;
   const f = ENV_FAMILIES.find((x) => x.id === id);
   if (f) return f.base;
+  const n = ENV_NATURE_WB.find((x) => x.id === id);
+  if (n) return n.base;
   return id;
 }
 

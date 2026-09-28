@@ -397,7 +397,7 @@ function ChoiceBlock({ q, picked, ok, locked, onPick }: { q: Extract<Question, {
     <div>
       <h2 className="en text-xl leading-tight sm:text-5xl" lang="en" translate="no">{prompt}</h2>
       {detail ? <p className="mt-3 max-h-28 overflow-auto text-sm leading-relaxed text-stone-600" lang="en" translate="no">{detail}</p> : null}
-      <div className="mt-4 grid max-h-[min(16rem,calc(100dvh-24rem))] gap-2 overflow-y-auto overscroll-contain pb-8 sm:max-h-none sm:pb-1">
+      <div className="mt-4 grid max-h-[min(11rem,calc(100svh-22rem))] gap-2 overflow-y-auto overscroll-contain pb-16 sm:max-h-none sm:pb-1">
         {q.options.map((o, i) => {
           const state = ok === null ? "" : o === q.answer ? "bg-emerald-700 text-white" : o === picked ? "bg-rose-800 text-white" : "opacity-70";
           return (
