@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { MODULES } from "@/data/unit1";
 import { ENV_MODULES } from "@/data/unit2";
+import { CAREER_MODULES } from "@/data/unit3";
 import { itemLabel } from "@/lib/questions";
 import { envItemLabel } from "@/lib/questions-env";
+import { careerItemLabel } from "@/lib/questions-career";
 import { useProgress } from "@/lib/progress";
 import { TopBar, UnitSwitch } from "@/components/Shell";
 
@@ -13,16 +15,20 @@ export default function ProgressPage() {
   const attempts = Object.values(state.items).reduce((a, s) => a + s.correct + s.wrong, 0);
   const correct = Object.values(state.items).reduce((a, s) => a + s.correct, 0);
   const accuracy = attempts ? Math.round((correct / attempts) * 100) : 0;
-  const list = currentUnit === "unit2" ? ENV_MODULES : MODULES;
-  const label = currentUnit === "unit2" ? envItemLabel : itemLabel;
+  const list = currentUnit === "unit3" ? CAREER_MODULES : currentUnit === "unit2" ? ENV_MODULES : MODULES;
+  const label = currentUnit === "unit3" ? careerItemLabel : currentUnit === "unit2" ? envItemLabel : itemLabel;
   return (
     <main>
       <TopBar title="Прогресс" meta={`${state.xp} XP`} />
       <UnitSwitch />
       <p className="mb-4 text-sm text-stone-600">
-        Открыт юнит {currentUnit === "unit2" ? "Environmental Issues" : "Family"}.
+        Открыт юнит {currentUnit === "unit3" ? "Choosing a Career" : currentUnit === "unit2" ? "Environmental Issues" : "Family"}.
         {" "}
-        {currentUnit === "unit2" ? <Link href="/unit/family" className="underline">Перейти к Family</Link> : <Link href="/unit/environmental" className="underline">Перейти к Environmental Issues</Link>}
+        <Link href="/unit/family" className="underline">Family</Link>
+        {" · "}
+        <Link href="/unit/environmental" className="underline">Environmental Issues</Link>
+        {" · "}
+        <Link href="/unit/career" className="underline">Choosing a Career</Link>
       </p>
       <section className="grid gap-3 sm:grid-cols-3">
         <Card label="Точность" value={`${accuracy}%`} />

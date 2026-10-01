@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { COLLOCATIONS, FATHER, PREP_A, PREP_B, SISTERS, SPOTLIGHT_STAY, VOCAB, WORD_FAMILIES } from "@/data/unit1";
 import { ENV_IDIOMS, ENV_PHRASALS, ENV_PREP, ENV_VOCAB } from "@/data/unit2";
+import { CAREER_COLLOS, CAREER_FAMILIES, CAREER_IDIOMS, CAREER_KEY, CAREER_PREP, CAREER_VOCAB } from "@/data/unit3";
 import { TopBar, UnitSwitch } from "@/components/Shell";
 import { useProgress } from "@/lib/progress";
 
@@ -36,7 +37,7 @@ function Section({ title, rows, items, query }: { title: string; rows: Row[]; it
 }
 
 export default function GlossaryPage() {
-  const { family, env, currentUnit } = useProgress();
+  const { family, env, career, currentUnit } = useProgress();
   const [query, setQuery] = useState("");
   const familyRows = useMemo<Row[]>(() => [
     ...VOCAB.map((v) => ({ id: v.id, en: v.english, ru: v.translation, extra: v.example, group: "Vocabulary" })),
@@ -53,13 +54,23 @@ export default function GlossaryPage() {
     ...ENV_PHRASALS.map((v) => ({ id: v.id, en: v.english, ru: v.translation, extra: v.definition, group: "Phrasal verbs" })),
     ...ENV_PREP.map((v) => ({ id: v.id, en: v.english, ru: v.meaning, group: "Prepositions" })),
   ], []);
+  const careerRows = useMemo<Row[]>(() => [
+    ...CAREER_VOCAB.map((v) => ({ id: v.id, en: v.english, ru: v.translation, extra: v.example, group: "Vocabulary" })),
+    ...CAREER_IDIOMS.map((v) => ({ id: v.id, en: v.english, ru: v.definition, extra: v.situation, group: "Idioms" })),
+    ...CAREER_COLLOS.map((v) => ({ id: v.id, en: v.english, ru: v.translation, group: "Collocations" })),
+    ...CAREER_PREP.map((v) => ({ id: v.id, en: v.english, ru: v.meaning, group: "Prepositions" })),
+    ...CAREER_KEY.map((v) => ({ id: v.id, en: v.english, ru: v.meaning, group: "Key phrases" })),
+    ...CAREER_FAMILIES.map((v) => ({ id: v.id, en: `${v.base} → ${v.noun}`, ru: v.example, group: "Word building" })),
+  ], []);
   return (
     <main>
       <TopBar title="Словарь" />
       <UnitSwitch />
-      <p className="mb-4 text-sm text-stone-600">Открыт юнит {currentUnit === "unit2" ? "Environmental Issues" : "Family"}. Перевод и пример открываются после первого верного ответа в задании.</p>
+      <p className="mb-4 text-sm text-stone-600">Открыт юнит {currentUnit === "unit3" ? "Choosing a Career" : currentUnit === "unit2" ? "Environmental Issues" : "Family"}. Перевод и пример открываются после первого верного ответа в задании.</p>
       <input className="mb-6 min-h-12 w-full rounded-2xl border border-stone-300 bg-white px-3" placeholder="Найти слово или перевод" value={query} onChange={(e) => setQuery(e.target.value)} />
-      {currentUnit === "unit2"
+      {currentUnit === "unit3"
+        ? <Section title="Choosing a Career" rows={careerRows} items={career.items} query={query} />
+        : currentUnit === "unit2"
         ? <Section title="Environmental Issues" rows={envRows} items={env.items} query={query} />
         : <Section title="Family" rows={familyRows} items={family.items} query={query} />}
     </main>

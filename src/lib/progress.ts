@@ -2,8 +2,10 @@
 
 import { MODULES, type ModuleId } from "@/data/unit1";
 import { ENV_MODULES } from "@/data/unit2";
+import { CAREER_MODULES } from "@/data/unit3";
 import { activitiesFor } from "@/lib/questions";
 import { envActivitiesFor } from "@/lib/questions-env";
+import { careerActivitiesFor } from "@/lib/questions-career";
 import { usePathname } from "next/navigation";
 import { createContext, createElement, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
@@ -25,6 +27,7 @@ export type ProgressState = {
 
 const KEY1 = "english-quest-unit1";
 const KEY2 = "english-quest-unit2";
+const KEY3 = "english-quest-unit3";
 const CURRENT = "english-quest-current-unit";
 
 const empty = (): ProgressState => ({
@@ -59,20 +62,25 @@ function loadKey(key: string): ProgressState {
   }
 }
 
-export type QuestUnit = "unit1" | "unit2";
+export type QuestUnit = "unit1" | "unit2" | "unit3";
 
 function pathUnit(path: string, stored: QuestUnit): QuestUnit {
+  if (path.startsWith("/career") || path.startsWith("/unit/career")) return "unit3";
   if (path.startsWith("/env") || path.startsWith("/unit/environmental")) return "unit2";
   if (path.startsWith("/unit/family") || path.startsWith("/module") || path === "/final") return "unit1";
   return stored;
 }
 
 function actsFor(unit: QuestUnit, id: string) {
-  return unit === "unit2" ? envActivitiesFor(id) : activitiesFor(id);
+  if (unit === "unit3") return careerActivitiesFor(id);
+  if (unit === "unit2") return envActivitiesFor(id);
+  return activitiesFor(id);
 }
 
 function mods(unit: QuestUnit) {
-  return unit === "unit2" ? ENV_MODULES : MODULES;
+  if (unit === "unit3") return CAREER_MODULES;
+  if (unit === "unit2") return ENV_MODULES;
+  return MODULES;
 }
 
 function awardFamily(s: ProgressState): string[] {
@@ -106,10 +114,26 @@ function awardEnv(s: ProgressState): string[] {
   return [...got];
 }
 
+function awardCareer(s: ProgressState): string[] {
+  const got = new Set(s.achievements);
+  const add = (id: string) => got.add(id);
+  const any = Object.values(s.items).some((i) => i.correct + i.wrong > 0) || s.completed.length > 0;
+  if (any) add("first-apply");
+  const vocabCorrect = Object.values(s.items).filter((st) => st.correct >= 2).length;
+  if (vocabCorrect >= 15) add("career-vocab");
+  const done = (mod: string) => careerActivitiesFor(mod).every((a) => s.completed.includes(`${mod}/${a.id}`));
+  if (done("idioms")) add("career-idioms");
+  if (done("collocations")) add("career-perks");
+  if (done("word-building")) add("career-forms");
+  if (s.finalDone) add("career-quest");
+  return [...got];
+}
+
 type Api = {
   state: ProgressState;
   family: ProgressState;
   env: ProgressState;
+  career: ProgressState;
   currentUnit: QuestUnit;
   headerXp: number;
   ready: boolean;
@@ -122,6 +146,7 @@ type Api = {
   unitProgress: number;
   familyProgress: number;
   envProgress: number;
+  careerProgress: number;
   practiceIds: string[];
   masteredIds: string[];
   setCursor: (key: string, step: number) => void;
@@ -148,15 +173,18 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   const path = usePathname() ?? "/";
   const [family, setFamily] = useState<ProgressState>(empty);
   const [env, setEnv] = useState<ProgressState>(empty);
+  const [career, setCareer] = useState<ProgressState>(empty);
   const [currentUnit, setCurrentUnit] = useState<QuestUnit>("unit1");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const f = loadKey(KEY1);
     const e = loadKey(KEY2);
+    const c = loadKey(KEY3);
     const stored = (localStorage.getItem(CURRENT) as QuestUnit) || "unit1";
     setFamily(f);
     setEnv(e);
+    setCareer(c);
     const unit = pathUnit(path, stored);
     setCurrentUnit(unit);
     localStorage.setItem(CURRENT, unit);
@@ -164,6 +192,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (path.startsWith("/unit/career") || path.startsWith("/career")) {
+      localStorage.setItem(CURRENT, "unit3");
+      setCurrentUnit("unit3");
+      return;
+    }
     if (path.startsWith("/unit/environmental") || path.startsWith("/env")) {
       localStorage.setItem(CURRENT, "unit2");
       setCurrentUnit("unit2");
@@ -181,10 +214,13 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (ready) localStorage.setItem(KEY2, JSON.stringify(env));
   }, [env, ready]);
+  useEffect(() => {
+    if (ready) localStorage.setItem(KEY3, JSON.stringify(career));
+  }, [career, ready]);
 
-  const state = currentUnit === "unit2" ? env : family;
-  const setState = currentUnit === "unit2" ? setEnv : setFamily;
-  const award = currentUnit === "unit2" ? awardEnv : awardFamily;
+  const state = currentUnit === "unit3" ? career : currentUnit === "unit2" ? env : family;
+  const setState = currentUnit === "unit3" ? setCareer : currentUnit === "unit2" ? setEnv : setFamily;
+  const award = currentUnit === "unit3" ? awardCareer : currentUnit === "unit2" ? awardEnv : awardFamily;
 
   const api = useMemo<Api>(() => {
     const moduleProgress = (id: ModuleId) => {
@@ -204,17 +240,20 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       state,
       family,
       env,
+      career,
       currentUnit,
-      headerXp: family.xp + env.xp,
+      headerXp: family.xp + env.xp + career.xp,
       ready,
       setName: (name) => {
         const n = name.trim().slice(0, 24) || "Ученик";
         setFamily((s) => ({ ...s, name: n }));
         setEnv((s) => ({ ...s, name: n }));
+        setCareer((s) => ({ ...s, name: n }));
       },
       setMotion: (reduceMotion) => {
         setFamily((s) => ({ ...s, reduceMotion }));
         setEnv((s) => ({ ...s, reduceMotion }));
+        setCareer((s) => ({ ...s, reduceMotion }));
       },
       record: (itemIds, correct, practiceFlag, awardXp = true) => {
         let gained = 0;
@@ -269,6 +308,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       reset: () => {
         setFamily((s) => ({ ...empty(), name: s.name, reduceMotion: s.reduceMotion }));
         setEnv((s) => ({ ...empty(), name: s.name, reduceMotion: s.reduceMotion }));
+        setCareer((s) => ({ ...empty(), name: s.name, reduceMotion: s.reduceMotion }));
       },
       finalReady: list.every((m) => actsFor(currentUnit, m.id).some((a) => state.completed.includes(`${m.id}/${a.id}`))),
       tasksLeftForFinal: list.filter((m) => !actsFor(currentUnit, m.id).some((a) => state.completed.includes(`${m.id}/${a.id}`))).length,
@@ -276,6 +316,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       unitProgress: unitPct(state, currentUnit),
       familyProgress: unitPct(family, "unit1"),
       envProgress: unitPct(env, "unit2"),
+      careerProgress: unitPct(career, "unit3"),
       practiceIds,
       masteredIds,
       selectUnit: (u) => {
@@ -283,7 +324,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setCurrentUnit(u);
       },
     };
-  }, [state, ready, currentUnit, family, env]);
+  }, [state, ready, currentUnit, family, env, career]);
 
   return createElement(Ctx.Provider, { value: api }, children);
 }
@@ -311,4 +352,13 @@ export const ACHIEVEMENTS_ENV = [
   { id: "collocation-climate", title: "Collocation Climate", text: "Завершён модуль Collocations." },
   { id: "word-family", title: "Word Family", text: "Завершён модуль Word Building." },
   { id: "nature-quest", title: "Nature Quest Complete", text: "Пройден юнит Environmental Issues." },
+];
+
+export const ACHIEVEMENTS_CAREER = [
+  { id: "first-apply", title: "First Apply", text: "Первое выполненное задание юнита Choosing a Career." },
+  { id: "career-vocab", title: "Career Vocab", text: "Пятнадцать единиц с повторно верными ответами." },
+  { id: "career-idioms", title: "Work Phrases", text: "Завершён модуль Idioms & Phrasal Verbs." },
+  { id: "career-perks", title: "Perks Pro", text: "Завершён модуль Collocations." },
+  { id: "career-forms", title: "Career Forms", text: "Завершён модуль Word Building." },
+  { id: "career-quest", title: "Career Quest Complete", text: "Пройден юнит Choosing a Career." },
 ];
