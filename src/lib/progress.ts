@@ -64,13 +64,6 @@ function loadKey(key: string): ProgressState {
 
 export type QuestUnit = "unit1" | "unit2" | "unit3";
 
-function pathUnit(path: string, stored: QuestUnit): QuestUnit {
-  if (path.startsWith("/career") || path.startsWith("/unit/career")) return "unit3";
-  if (path.startsWith("/env") || path.startsWith("/unit/environmental")) return "unit2";
-  if (path.startsWith("/unit/family") || path.startsWith("/module") || path === "/final") return "unit1";
-  return stored;
-}
-
 function actsFor(unit: QuestUnit, id: string) {
   if (unit === "unit3") return careerActivitiesFor(id);
   if (unit === "unit2") return envActivitiesFor(id);
@@ -185,9 +178,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     setFamily(f);
     setEnv(e);
     setCareer(c);
-    const unit = pathUnit(path, stored);
-    setCurrentUnit(unit);
-    localStorage.setItem(CURRENT, unit);
+    // Юнит из адреса выставляет следующий эффект (он зависит от path): на общих
+    // страницах остаётся сохранённый юнит, поэтому сам path здесь не нужен.
+    setCurrentUnit(stored);
+    localStorage.setItem(CURRENT, stored);
     setReady(true);
   }, []);
 
@@ -324,7 +318,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setCurrentUnit(u);
       },
     };
-  }, [state, ready, currentUnit, family, env, career]);
+  }, [state, ready, currentUnit, family, env, career, award, setState]);
 
   return createElement(Ctx.Provider, { value: api }, children);
 }

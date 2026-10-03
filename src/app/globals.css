@@ -22,9 +22,9 @@ body {
     radial-gradient(1200px 500px at 10% -10%, rgba(161, 92, 50, 0.16), transparent 55%),
     radial-gradient(900px 480px at 110% 0%, rgba(31, 111, 106, 0.18), transparent 50%),
     var(--paper);
-  font-family: "Outfit", "Segoe UI", sans-serif;
+  font-family: var(--font-outfit), "Segoe UI", sans-serif;
 }
-h1, h2, .display { font-family: "Fraunces", Georgia, serif; font-weight: 560; letter-spacing: -0.03em; }
+h1, h2, .display { font-family: var(--font-fraunces), Georgia, serif; font-weight: 560; letter-spacing: -0.03em; }
 button, a { -webkit-tap-highlight-color: transparent; }
 .glass {
   background: var(--panel);
@@ -32,7 +32,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   box-shadow: 0 20px 50px rgba(48, 36, 20, 0.08);
   backdrop-filter: blur(16px);
 }
-.en { font-family: "Fraunces", Georgia, serif; }
+.en { font-family: var(--font-fraunces), Georgia, serif; }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes pop { 0% { transform: scale(0.96); } 60% { transform: scale(1.03); } 100% { transform: scale(1); } }
 .rise { animation: rise 0.45s ease both; }

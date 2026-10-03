@@ -23,7 +23,6 @@ export default function ActivityPage() {
         activityKey={`${slug}/${activity}`}
         onDoneHref={`/module/${slug}`}
         accent={mod.accent}
-        wash={mod.wash}
         copy={{ mechanic: found.mechanic, heading: found.heading, instruction: found.instruction, whatToDo: found.whatToDo, hint: found.hint }}
         nextHref={next ? `/module/${mod.id}/${next.id}` : undefined}
       />

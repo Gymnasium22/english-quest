@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { MODULES } from "@/data/unit1";
 import { copyFor, type Question } from "@/lib/questions";
@@ -35,7 +35,6 @@ export function Player({
   onDoneHref = "/",
   finalMode = false,
   accent = "#1c1915",
-  wash = "#f3ece3",
   copy,
   nextHref,
   onReplay,
@@ -47,7 +46,6 @@ export function Player({
   onDoneHref?: string;
   finalMode?: boolean;
   accent?: string;
-  wash?: string;
   copy?: Copy;
   nextHref?: string;
   onReplay?: () => void;
@@ -84,6 +82,38 @@ export function Player({
   const q = deck[step];
   const text = q ? (copy ?? copyFor(q)) : null;
 
+  const grade = useCallback((correct: boolean, ids: string[], practice?: boolean) => {
+    if (answered.current) return;
+    answered.current = true;
+    const combo = correct ? state.combo + 1 : 0;
+    const bonus = correct && combo > 0 && combo % 3 === 0 ? 5 : 0;
+    const replay = Boolean(activityKey && state.completed.includes(activityKey));
+    const already = ids.every((id) => (state.items[id]?.correct ?? 0) > 0);
+    record(ids, correct, practice, !replay);
+    setOk(correct);
+    setPending(false);
+    setGain(replay || already || !correct ? 0 : 10 + bonus);
+    setSession((s) => ({ asked: s.asked + 1, correct: s.correct + (correct ? 1 : 0) }));
+  }, [state, activityKey, record]);
+
+  const miss = useCallback((ids: string[]) => {
+    const nextTry = tries + 1;
+    setTries(nextTry);
+    setPicked(null);
+    if (nextTry < 2) {
+      record(ids, false, true, false);
+      setPending(true);
+      setOk(null);
+      return;
+    }
+    if (answered.current) return;
+    answered.current = true;
+    setOk(false);
+    setPending(false);
+    setGain(0);
+    setSession((s) => ({ asked: s.asked + 1, correct: s.correct }));
+  }, [tries, record]);
+
   useEffect(() => {
     if (startXp.current === null && ready) startXp.current = state.xp;
   }, [ready, state.xp]);
@@ -118,7 +148,7 @@ export function Player({
       setPlaced({});
       miss(q.itemIds);
     }
-  }, [placed, q, pending, ok]);
+  }, [placed, q, pending, ok, grade, miss]);
 
   useEffect(() => {
     if (!q || q.kind !== "sort") return;
@@ -130,7 +160,7 @@ export function Player({
       setBucketPick({});
       miss(q.itemIds);
     }
-  }, [bucketPick, q, pending, ok]);
+  }, [bucketPick, q, pending, ok, grade, miss]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -145,38 +175,6 @@ export function Player({
   });
 
   const finished = step >= deck.length;
-
-  function grade(correct: boolean, ids: string[], practice?: boolean) {
-    if (answered.current) return;
-    answered.current = true;
-    const combo = correct ? state.combo + 1 : 0;
-    const bonus = correct && combo > 0 && combo % 3 === 0 ? 5 : 0;
-    const replay = Boolean(activityKey && state.completed.includes(activityKey));
-    const already = ids.every((id) => (state.items[id]?.correct ?? 0) > 0);
-    record(ids, correct, practice, !replay);
-    setOk(correct);
-    setPending(false);
-    setGain(replay || already || !correct ? 0 : 10 + bonus);
-    setSession((s) => ({ asked: s.asked + 1, correct: s.correct + (correct ? 1 : 0) }));
-  }
-
-  function miss(ids: string[]) {
-    const nextTry = tries + 1;
-    setTries(nextTry);
-    setPicked(null);
-    if (nextTry < 2) {
-      record(ids, false, true, false);
-      setPending(true);
-      setOk(null);
-      return;
-    }
-    if (answered.current) return;
-    answered.current = true;
-    setOk(false);
-    setPending(false);
-    setGain(0);
-    setSession((s) => ({ asked: s.asked + 1, correct: s.correct }));
-  }
 
   function choose(option: string) {
     if (ok !== null || !q || pending) return;

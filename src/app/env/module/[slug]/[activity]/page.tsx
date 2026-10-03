@@ -23,7 +23,6 @@ export default function EnvActivityPage() {
         activityKey={`${slug}/${activity}`}
         onDoneHref={`/env/module/${slug}`}
         accent={mod.accent}
-        wash={mod.wash}
         copy={{ mechanic: found.mechanic, heading: found.heading, instruction: found.instruction, whatToDo: found.whatToDo, hint: found.hint }}
         nextHref={next ? `/env/module/${mod.id}/${next.id}` : undefined}
         moduleList={ENV_MODULES}

@@ -353,7 +353,6 @@ function colloActivities(): ActivityDef[] {
   const fills: Question[] = COLLOCATIONS.flatMap((c, i) => {
     const surface = c.english.replace(/\(.*\)/, "").replace(/\/.*/, "").replace(/'/g, "").trim();
     const gap = blankExample(c.example.replace(/'/g, ""), surface.split(" ")[0].length > 3 ? surface : c.tokens[0]);
-    const word = c.tokens.length > 2 ? c.tokens.slice(0, 2).join(" ") : c.english;
     const answer = c.english;
     return [{
       kind: "choice" as const,

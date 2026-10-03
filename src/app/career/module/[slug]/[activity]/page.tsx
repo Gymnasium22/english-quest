@@ -23,7 +23,6 @@ export default function CareerActivityPage() {
         activityKey={`${slug}/${activity}`}
         onDoneHref={`/career/module/${slug}`}
         accent={mod.accent}
-        wash={mod.wash}
         copy={{ mechanic: found.mechanic, heading: found.heading, instruction: found.instruction, whatToDo: found.whatToDo, hint: found.hint }}
         nextHref={next ? `/career/module/${mod.id}/${next.id}` : undefined}
         moduleList={CAREER_MODULES}
