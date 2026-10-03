@@ -242,4 +242,4 @@ export const MODULES = [
   { id: "word-building", title: "Word Building", kicker: "Глагол и существительное", href: "/module/word-building", tone: "burgundy", accent: "#8E3A3A", wash: "#F6E4E2", countLabel: "25 пар" },
 ] as const;
 
-export type ModuleId = (typeof MODULES)[number]["id"];
+export type { ModuleId } from "@/data/module-ids";

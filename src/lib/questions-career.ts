@@ -5,8 +5,8 @@ import {
   CAREER_KEY,
   CAREER_PREP,
   CAREER_VOCAB,
-  type CareerModuleId,
 } from "@/data/unit3";
+import { MODULE_IDS } from "@/data/module-ids";
 import type { ActivityDef, Question } from "@/lib/questions";
 import { blankExample, chunk, chunk34, optionsFor, shuffle } from "@/lib/question-kit";
 
@@ -274,5 +274,5 @@ export function careerItemLabel(id: string): string {
 }
 
 export function careerModuleList() {
-  return ["vocabulary", "idioms", "collocations", "prepositions", "word-building"] as CareerModuleId[];
+  return [...MODULE_IDS];
 }

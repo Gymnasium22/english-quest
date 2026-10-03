@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { MODULES } from "@/data/unit1";
+import type { ModuleId } from "@/data/module-ids";
 import { copyFor, type Question } from "@/lib/questions";
 import { useProgress } from "@/lib/progress";
 import { HintIcon } from "@/components/Marks";
@@ -49,7 +50,7 @@ export function Player({
   copy?: Copy;
   nextHref?: string;
   onReplay?: () => void;
-  moduleList?: readonly { id: string; title: string }[];
+  moduleList?: readonly { id: ModuleId; title: string }[];
 }) {
   const list = moduleList ?? MODULES;
   const { record, completeActivity, completeFinal, setCursor, state, ready, practiceIds, masteredIds, moduleProgress } = useProgress();
@@ -237,7 +238,7 @@ export function Player({
               {list.map((m) => (
                 <li key={m.id} className="flex items-center justify-between text-sm">
                   <span>{m.title}</span>
-                  <span>{moduleProgress(m.id as "vocabulary")}%</span>
+                  <span>{moduleProgress(m.id)}%</span>
                 </li>
               ))}
             </ul>

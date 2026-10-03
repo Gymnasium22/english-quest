@@ -7,8 +7,8 @@ import {
   ENV_PREP,
   ENV_VOCAB,
   RAIN_SCALE,
-  type EnvModuleId,
 } from "@/data/unit2";
+import { MODULE_IDS } from "@/data/module-ids";
 import type { ActivityDef, Question } from "@/lib/questions";
 import { blankExample, chunk, chunk34, optionsFor, shuffle } from "@/lib/question-kit";
 
@@ -354,5 +354,5 @@ export function envItemLabel(id: string): string {
 }
 
 export function envModuleList() {
-  return ["vocabulary", "idioms", "collocations", "prepositions", "word-building"] as EnvModuleId[];
+  return [...MODULE_IDS];
 }
