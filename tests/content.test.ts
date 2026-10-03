@@ -1,10 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { auditContent, buildSnapshot } from "@/lib/content-audit";
+import { auditContent, buildSnapshot, splitIssues } from "@/lib/content-audit";
 import fixture from "./__fixtures__/generated.json";
 
 describe("контент", () => {
   it("сборка вопросов совпадает с эталоном", () => {
     expect(buildSnapshot()).toEqual(fixture);
+  });
+
+  it("нет новых ошибок сверх известных проблем", () => {
+    const { unknown } = splitIssues(auditContent().issues);
+    expect(unknown.filter((issue) => issue.level === "error")).toEqual([]);
+  });
+
+  it("нет новых предупреждений сверх известных проблем", () => {
+    const { unknown } = splitIssues(auditContent().issues);
+    expect(unknown.filter((issue) => issue.level === "warning")).toEqual([]);
   });
 
   it("у каждого юнита пять модулей с заданиями", () => {

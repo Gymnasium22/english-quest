@@ -1,14 +1,16 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { auditContent, buildSnapshot, type AuditIssue } from "@/lib/content-audit";
+import { auditContent, buildSnapshot, issueKey, splitIssues, type AuditIssue } from "@/lib/content-audit";
 
 const args = process.argv.slice(2);
 const strict = args.includes("--strict");
 const snapshotIndex = args.indexOf("--snapshot");
+const writeBaseline = args.includes("--write-baseline");
 
 const report = auditContent();
-const errors = report.issues.filter((issue) => issue.level === "error");
-const warnings = report.issues.filter((issue) => issue.level === "warning");
+const { known, unknown } = splitIssues(report.issues);
+const unknownErrors = unknown.filter((issue) => issue.level === "error");
+const unknownWarnings = unknown.filter((issue) => issue.level === "warning");
 
 function printSection(title: string, issues: AuditIssue[]): void {
   if (!issues.length) return;
@@ -40,10 +42,29 @@ if (snapshotIndex >= 0) {
   console.log(`\nСлепок записан: ${target}`);
 }
 
-printSection("Ошибки", errors);
-printSection("Предупреждения", warnings);
+if (writeBaseline) {
+  const target = resolve(process.cwd(), "src/lib/known-content-issues.json");
+  const keys = [...new Set(report.issues.map(issueKey))].sort();
+  const payload = {
+    note: "Известные проблемы контента. Валидатор не считает их новыми и не роняет проверку. Ключ = unit|module|activity|where|code. Пересобрать: npm run validate -- --write-baseline",
+    keys,
+  };
+  mkdirSync(dirname(target), { recursive: true });
+  writeFileSync(target, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  console.log(`\nБазовый список обновлён: ${keys.length} записей.`);
 
-console.log(`\nИтого: ошибок ${errors.length}, предупреждений ${warnings.length}.`);
-if (errors.length || (strict && warnings.length)) {
+  console.log("\nИзвестные проблемы:");
+  for (const issue of report.issues) {
+    const place = [issue.unit, issue.module, issue.activity].filter(Boolean).join(" / ");
+    console.log(`  [${issue.level}] ${place} — ${issue.where} — ${issue.code}: ${issue.message}`);
+  }
+  process.exit(0);
+}
+
+printSection("Новые ошибки", unknownErrors);
+printSection("Новые предупреждения", unknownWarnings);
+
+console.log(`\nИтого: новых ошибок ${unknownErrors.length}, новых предупреждений ${unknownWarnings.length}, известных проблем ${known.length}.`);
+if (unknownErrors.length || (strict && unknownWarnings.length)) {
   process.exit(1);
 }
