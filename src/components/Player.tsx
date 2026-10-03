@@ -1,33 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { MODULES } from "@/data/unit1";
 import type { ModuleId } from "@/data/module-ids";
 import { copyFor, type Question } from "@/lib/questions";
 import { useProgress } from "@/lib/progress";
 import { HintIcon } from "@/components/Marks";
+import { useGrading } from "@/components/player/useGrading";
+import { useQuestionSession, shuffled } from "@/components/player/useQuestionSession";
 
 type Copy = { mechanic: string; heading: string; instruction: string; whatToDo: string; hint: string };
-
-function shuffled<T>(list: T[]): T[] {
-  const arr = [...list];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function mixDeck(list: Question[]): Question[] {
-  return shuffled(list).map((q) => {
-    if (q.kind === "choice" || q.kind === "fill" || q.kind === "story") return { ...q, options: shuffled(q.options) };
-    if (q.kind === "match") return { ...q, pairs: shuffled(q.pairs) };
-    if (q.kind === "sort") return { ...q, cards: shuffled(q.cards) };
-    if (q.kind === "order") return { ...q, tokens: shuffled(q.tokens) };
-    return q;
-  });
-}
 
 export function Player({
   title,
@@ -54,152 +37,52 @@ export function Player({
 }) {
   const list = moduleList ?? MODULES;
   const { record, completeActivity, completeFinal, setCursor, state, ready, practiceIds, masteredIds, moduleProgress } = useProgress();
-  const [deck, setDeck] = useState<Question[]>(questions);
-  const mixed = useRef(false);
-  useEffect(() => {
-    if (mixed.current) return;
-    mixed.current = true;
-    setDeck(mixDeck(questions));
-  }, [questions]);
-  const [step, setStep] = useState(0);
-  const [rest, setRest] = useState(false);
-  const [session, setSession] = useState({ asked: 0, correct: 0 });
+  const grading = useGrading({ state, activityKey, record });
+  const flow = useQuestionSession({
+    questions,
+    grading,
+    activityKey,
+    finalMode,
+    onCursor: setCursor,
+    onActivityDone: completeActivity,
+    onFinalDone: completeFinal,
+  });
+  const {
+    deck,
+    step,
+    q,
+    finished,
+    rest,
+    setRest,
+    picked,
+    typed,
+    setTyped,
+    placed,
+    setPlaced,
+    selectedLeft,
+    setSelectedLeft,
+    order,
+    setOrder,
+    bank,
+    setBank,
+    flipped,
+    setFlipped,
+    bucketPick,
+    setBucketPick,
+    activeCard,
+    setActiveCard,
+    showHint,
+    setShowHint,
+    choose,
+    finishIfLast,
+  } = flow;
+  const { ok, pending, gain, session, resume, grade, miss } = grading;
   const startXp = useRef<number | null>(null);
-  const answered = useRef(false);
-  const [picked, setPicked] = useState<string | null>(null);
-  const [ok, setOk] = useState<boolean | null>(null);
-  const [gain, setGain] = useState(0);
-  const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
-  const [placed, setPlaced] = useState<Record<string, string>>({});
-  const [order, setOrder] = useState<string[]>([]);
-  const [bank, setBank] = useState<string[]>([]);
-  const [flipped, setFlipped] = useState(false);
-  const [bucketPick, setBucketPick] = useState<Record<string, string>>({});
-  const [activeCard, setActiveCard] = useState<string | null>(null);
-  const [tries, setTries] = useState(0);
-  const [showHint, setShowHint] = useState(false);
-  const [pending, setPending] = useState(false);
-  const [typed, setTyped] = useState("");
-  const q = deck[step];
   const text = q ? (copy ?? copyFor(q)) : null;
-
-  const grade = useCallback((correct: boolean, ids: string[], practice?: boolean) => {
-    if (answered.current) return;
-    answered.current = true;
-    const combo = correct ? state.combo + 1 : 0;
-    const bonus = correct && combo > 0 && combo % 3 === 0 ? 5 : 0;
-    const replay = Boolean(activityKey && state.completed.includes(activityKey));
-    const already = ids.every((id) => (state.items[id]?.correct ?? 0) > 0);
-    record(ids, correct, practice, !replay);
-    setOk(correct);
-    setPending(false);
-    setGain(replay || already || !correct ? 0 : 10 + bonus);
-    setSession((s) => ({ asked: s.asked + 1, correct: s.correct + (correct ? 1 : 0) }));
-  }, [state, activityKey, record]);
-
-  const miss = useCallback((ids: string[]) => {
-    const nextTry = tries + 1;
-    setTries(nextTry);
-    setPicked(null);
-    if (nextTry < 2) {
-      record(ids, false, true, false);
-      setPending(true);
-      setOk(null);
-      return;
-    }
-    if (answered.current) return;
-    answered.current = true;
-    setOk(false);
-    setPending(false);
-    setGain(0);
-    setSession((s) => ({ asked: s.asked + 1, correct: s.correct }));
-  }, [tries, record]);
 
   useEffect(() => {
     if (startXp.current === null && ready) startXp.current = state.xp;
   }, [ready, state.xp]);
-
-  useEffect(() => {
-    setPicked(null);
-    setOk(null);
-    setGain(0);
-    setSelectedLeft(null);
-    setPlaced({});
-    setFlipped(false);
-    setBucketPick({});
-    setActiveCard(null);
-    setTries(0);
-    setShowHint(false);
-    setPending(false);
-    setTyped("");
-    answered.current = false;
-    if (q?.kind === "order") {
-      setBank(q.tokens.map((t, i) => `${i}:${t}`));
-      setOrder([]);
-    }
-  }, [step, q]);
-
-  useEffect(() => {
-    if (!q || q.kind !== "match") return;
-    if (Object.keys(placed).length !== q.pairs.length) return;
-    if (answered.current || pending || ok !== null) return;
-    const good = q.pairs.every((p) => placed[p.left] === p.right);
-    if (good) grade(true, q.itemIds);
-    else {
-      setPlaced({});
-      miss(q.itemIds);
-    }
-  }, [placed, q, pending, ok, grade, miss]);
-
-  useEffect(() => {
-    if (!q || q.kind !== "sort") return;
-    if (Object.keys(bucketPick).length !== q.cards.length) return;
-    if (answered.current || pending || ok !== null) return;
-    const good = q.cards.every((c) => bucketPick[c.id] === c.bucket);
-    if (good) grade(true, q.itemIds);
-    else {
-      setBucketPick({});
-      miss(q.itemIds);
-    }
-  }, [bucketPick, q, pending, ok, grade, miss]);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (!q || q.kind === "match" || q.kind === "order" || q.kind === "sort" || q.kind === "flip") return;
-      const opts = "options" in q ? q.options : [];
-      const n = Number(e.key);
-      if (n >= 1 && n <= opts.length && ok === null && !pending && !answered.current) choose(opts[n - 1]);
-      if (e.key === "Enter" && ok !== null) next();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  });
-
-  const finished = step >= deck.length;
-
-  function choose(option: string) {
-    if (ok !== null || !q || pending) return;
-    setPicked(option);
-    if (q.kind === "choice" || q.kind === "fill" || q.kind === "story") {
-      if (option === q.answer) grade(true, [q.itemId]);
-      else miss([q.itemId]);
-    }
-  }
-
-  function next() {
-    setStep((s) => s + 1);
-  }
-
-  function finishIfLast() {
-    const upcoming = step + 1;
-    if (activityKey) setCursor(activityKey, upcoming >= deck.length ? 0 : upcoming);
-    if (upcoming >= deck.length) {
-      if (activityKey) completeActivity(activityKey);
-      if (finalMode) completeFinal();
-    }
-    if (upcoming < deck.length && upcoming % 8 === 0) setRest(true);
-    next();
-  }
 
   if (!deck.length) {
     return <p className="glass rounded-3xl p-6">Здесь пока нечего повторять. Сначала пройдите задания и вернитесь сюда.</p>;
@@ -370,7 +253,7 @@ export function Player({
           <div className="mt-5 rounded-2xl bg-amber-50 p-4">
             <div className="font-semibold">Попробуйте ещё раз</div>
             <p className="mt-1 text-sm text-stone-700">Это не совсем тот вариант. Обратите внимание на значение и попробуйте другой ответ. Правильный вариант пока скрыт.</p>
-            <button type="button" className="mt-3 min-h-12 rounded-full px-5 text-white" style={{ background: accent }} onClick={() => setPending(false)}>Ещё попытка</button>
+            <button type="button" className="mt-3 min-h-12 rounded-full px-5 text-white" style={{ background: accent }} onClick={resume}>Ещё попытка</button>
           </div>
         ) : null}
         {ok !== null ? (
