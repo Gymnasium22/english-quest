@@ -1,34 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { MODULES } from "@/data/unit1";
-import { ENV_MODULES } from "@/data/unit2";
-import { CAREER_MODULES } from "@/data/unit3";
-import { itemLabel } from "@/lib/questions";
-import { envItemLabel } from "@/lib/questions-env";
-import { careerItemLabel } from "@/lib/questions-career";
-import { useProgress } from "@/lib/progress";
+import { Fragment } from "react";
 import { TopBar, UnitSwitch } from "@/components/Shell";
+import { useProgress } from "@/lib/progress";
+import { UNITS, unitById } from "@/lib/units";
 
+/**
+ * Прогресс открытого юнита. Список ссылок на юниты строится циклом по UNITS,
+ * а модули и подписи слов берутся из реестра для currentUnit — прямых импортов
+ * MODULES / ENV_MODULES / CAREER_MODULES и itemLabel здесь больше нет.
+ */
 export default function ProgressPage() {
   const { state, moduleProgress, practiceIds, masteredIds, currentUnit } = useProgress();
   const attempts = Object.values(state.items).reduce((a, s) => a + s.correct + s.wrong, 0);
   const correct = Object.values(state.items).reduce((a, s) => a + s.correct, 0);
   const accuracy = attempts ? Math.round((correct / attempts) * 100) : 0;
-  const list = currentUnit === "unit3" ? CAREER_MODULES : currentUnit === "unit2" ? ENV_MODULES : MODULES;
-  const label = currentUnit === "unit3" ? careerItemLabel : currentUnit === "unit2" ? envItemLabel : itemLabel;
+  const spec = unitById(currentUnit);
+  const list = spec.modules;
+  const label = spec.itemLabel;
   return (
     <main>
       <TopBar title="Прогресс" meta={`${state.xp} XP`} />
       <UnitSwitch />
       <p className="mb-4 text-sm text-stone-600">
-        Открыт юнит {currentUnit === "unit3" ? "Choosing a Career" : currentUnit === "unit2" ? "Environmental Issues" : "Family"}.
+        Открыт юнит {spec.title}.
         {" "}
-        <Link href="/unit/family" className="underline">Family</Link>
-        {" · "}
-        <Link href="/unit/environmental" className="underline">Environmental Issues</Link>
-        {" · "}
-        <Link href="/unit/career" className="underline">Choosing a Career</Link>
+        {UNITS.map((unit, i) => (
+          <Fragment key={unit.id}>
+            {i ? " · " : null}
+            <Link href={unit.hubHref} className="underline">{unit.title}</Link>
+          </Fragment>
+        ))}
       </p>
       <section className="grid gap-3 sm:grid-cols-3">
         <Card label="Точность" value={`${accuracy}%`} />
