@@ -8,55 +8,7 @@ import {
   type CareerModuleId,
 } from "@/data/unit3";
 import type { ActivityDef, Question } from "@/lib/questions";
-
-function shuffle<T>(list: T[], seed: number): T[] {
-  const arr = [...list];
-  let s = seed || 1;
-  for (let i = arr.length - 1; i > 0; i--) {
-    s = (s * 16807) % 2147483647;
-    const j = s % (i + 1);
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function optionsFor(correct: string, pool: string[], n = 4, seed = 3): string[] {
-  const rest = pool.filter((x) => x !== correct);
-  return shuffle([correct, ...shuffle(rest, seed).slice(0, n - 1)], seed + 9);
-}
-
-function chunk<T>(arr: T[], size: number): T[][] {
-  const out: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-  return out;
-}
-
-function chunk34<T>(arr: T[]): T[][] {
-  const out: T[][] = [];
-  let i = 0;
-  while (i < arr.length) {
-    const left = arr.length - i;
-    const size = left > 4 ? 3 : left;
-    out.push(arr.slice(i, i + size));
-    i += size;
-  }
-  if (out.length >= 2 && out[out.length - 1].length < 3) {
-    const tail = out.pop()!;
-    out[out.length - 1] = [...out[out.length - 1], ...tail];
-  }
-  return out.filter((g) => g.length >= 3);
-}
-
-function blankExample(example: string, surface: string): { before: string; after: string } | null {
-  const forms = surface.split("/").map((s) => s.trim()).filter((s) => s.length > 2);
-  const ordered = [...forms].sort((a, b) => b.length - a.length);
-  const lower = example.toLowerCase();
-  for (const form of ordered) {
-    const idx = lower.indexOf(form.toLowerCase());
-    if (idx >= 0) return { before: example.slice(0, idx), after: example.slice(idx + form.length) };
-  }
-  return null;
-}
+import { blankExample, chunk, chunk34, optionsFor, shuffle } from "@/lib/question-kit";
 
 function vocabActs(): ActivityDef[] {
   const poolT = CAREER_VOCAB.map((v) => v.translation);

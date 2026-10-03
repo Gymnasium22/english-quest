@@ -11,6 +11,7 @@ import {
   WORD_FAMILIES,
   type ModuleId,
 } from "@/data/unit1";
+import { blankExample, chunk, optionsFor, shuffle } from "@/lib/question-kit";
 
 export type ChoiceQ = {
   kind: "choice";
@@ -115,44 +116,6 @@ export function copyFor(q: Question) {
   return { mechanic: "CHOOSE", heading: "Выберите правильный вариант", instruction: "Один вариант подходит к заданию. Остальные — из этого же раздела.", whatToDo: "Выберите правильный вариант ответа.", hint: "Отбросьте варианты, которые относятся к другой теме раздела." };
 }
 
-function shuffle<T>(list: T[], seed: number): T[] {
-  const arr = [...list];
-  let s = seed || 1;
-  for (let i = arr.length - 1; i > 0; i--) {
-    s = (s * 16807) % 2147483647;
-    const j = s % (i + 1);
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function optionsFor(correct: string, pool: string[], n = 4, seed = 3): string[] {
-  const rest = pool.filter((x) => x !== correct);
-  return shuffle([correct, ...shuffle(rest, seed).slice(0, n - 1)], seed + 9);
-}
-
-function blankExample(example: string, surface: string): { before: string; after: string } | null {
-  const forms = surface
-    .split("/")
-    .map((s) => s.trim())
-    .filter((s) => s && !s.includes("sb") && !s.includes("sth") && s.length > 2);
-  const ordered = [...forms].sort((a, b) => b.length - a.length);
-  const lower = example.toLowerCase();
-  for (const form of ordered) {
-    const idx = lower.indexOf(form.toLowerCase());
-    if (idx >= 0) {
-      return { before: example.slice(0, idx), after: example.slice(idx + form.length) };
-    }
-  }
-  return null;
-}
-
-function chunk<T>(arr: T[], size: number): T[][] {
-  const out: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-  return out;
-}
-
 function vocabActivities(): ActivityDef[] {
   const poolT = VOCAB.map((v) => v.translation);
   const poolE = VOCAB.map((v) => v.english);
@@ -182,7 +145,7 @@ function vocabActivities(): ActivityDef[] {
     example: v.example,
   }));
   const fill: Question[] = VOCAB.flatMap((v, i) => {
-    const gap = blankExample(v.example, v.english.split("/")[0]);
+    const gap = blankExample(v.example, v.english.split("/")[0], { skipPlaceholders: true });
     if (!gap) return [];
     const answer = v.english.split("/")[0].trim();
     return [{
@@ -197,7 +160,7 @@ function vocabActivities(): ActivityDef[] {
     }];
   });
   const context: Question[] = VOCAB.map((v, i) => {
-    const gap = blankExample(v.example, v.english.split("/")[0]);
+    const gap = blankExample(v.example, v.english.split("/")[0], { skipPlaceholders: true });
     const answer = v.english;
     return {
       kind: "choice" as const,
@@ -352,7 +315,7 @@ function colloActivities(): ActivityDef[] {
   }));
   const fills: Question[] = COLLOCATIONS.flatMap((c, i) => {
     const surface = c.english.replace(/\(.*\)/, "").replace(/\/.*/, "").replace(/'/g, "").trim();
-    const gap = blankExample(c.example.replace(/'/g, ""), surface.split(" ")[0].length > 3 ? surface : c.tokens[0]);
+    const gap = blankExample(c.example.replace(/'/g, ""), surface.split(" ")[0].length > 3 ? surface : c.tokens[0], { skipPlaceholders: true });
     const answer = c.english;
     return [{
       kind: "choice" as const,
