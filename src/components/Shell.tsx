@@ -3,16 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ACHIEVEMENTS, ACHIEVEMENTS_CAREER, ACHIEVEMENTS_ENV, useProgress } from "@/lib/progress";
+import { useProgress } from "@/lib/progress";
+import { ALL_ACHIEVEMENTS, UNITS, unitById, unitForPath, type QuestUnit } from "@/lib/units";
 
-function brand(path: string, unit: string) {
-  if (path === "/") return { kicker: "ENGLISH QUEST", title: "QUEST", sub: "English Quest" };
-  if (path.startsWith("/career") || path.startsWith("/unit/career")) return { kicker: "UNIT 3", title: "CAREER", sub: "Choosing a Career" };
-  if (path.startsWith("/env") || path.startsWith("/unit/environmental")) return { kicker: "UNIT 2", title: "NATURE", sub: "Environmental Issues" };
-  if (path.startsWith("/unit/family") || path.startsWith("/module") || path === "/final") return { kicker: "UNIT 1", title: "FAMILY", sub: "English Quest" };
-  if (unit === "unit3") return { kicker: "UNIT 3", title: "CAREER", sub: "Choosing a Career" };
-  if (unit === "unit2") return { kicker: "UNIT 2", title: "NATURE", sub: "Environmental Issues" };
-  return { kicker: "UNIT 1", title: "FAMILY", sub: "English Quest" };
+const DASHBOARD_BRAND = { kicker: "ENGLISH QUEST", title: "QUEST", sub: "English Quest" };
+
+function brand(path: string, unit: QuestUnit) {
+  if (path === "/") return DASHBOARD_BRAND;
+  return unitById(unitForPath(path) ?? unit).brand;
 }
 
 const links = [
@@ -31,7 +29,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<string | null>(null);
   const seen = useRef<string[] | null>(null);
   useEffect(() => {
-    if (path === "/" || path === "/unit/family" || path === "/unit/environmental" || path === "/unit/career") {
+    if (path === "/" || UNITS.some((unit) => unit.hubHref === path)) {
       sessionStorage.setItem("eq-hub", path);
     }
   }, [path]);
@@ -44,7 +42,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     const fresh = state.achievements.find((id) => !seen.current?.includes(id));
     seen.current = state.achievements;
     if (!fresh) return;
-    const item = [...ACHIEVEMENTS, ...ACHIEVEMENTS_ENV, ...ACHIEVEMENTS_CAREER].find((a) => a.id === fresh);
+    const item = ALL_ACHIEVEMENTS.find((achievement) => achievement.id === fresh);
     setToast(item ? `${item.title}. ${item.text}` : fresh);
     const timer = window.setTimeout(() => setToast(null), 4200);
     return () => window.clearTimeout(timer);
@@ -94,9 +92,17 @@ export function UnitSwitch() {
   const { currentUnit, selectUnit } = useProgress();
   return (
     <div className="mb-4 flex flex-wrap gap-2">
-      <button type="button" data-unit="unit1" onClick={() => selectUnit("unit1")} className={`min-h-11 rounded-full px-4 text-sm ${currentUnit === "unit1" ? "bg-stone-900 text-[#f4efe6]" : "border border-stone-300"}`}>Family</button>
-      <button type="button" data-unit="unit2" onClick={() => selectUnit("unit2")} className={`min-h-11 rounded-full px-4 text-sm ${currentUnit === "unit2" ? "bg-stone-900 text-[#f4efe6]" : "border border-stone-300"}`}>Environmental Issues</button>
-      <button type="button" data-unit="unit3" onClick={() => selectUnit("unit3")} className={`min-h-11 rounded-full px-4 text-sm ${currentUnit === "unit3" ? "bg-stone-900 text-[#f4efe6]" : "border border-stone-300"}`}>Choosing a Career</button>
+      {UNITS.map((unit) => (
+        <button
+          key={unit.id}
+          type="button"
+          data-unit={unit.id}
+          onClick={() => selectUnit(unit.id)}
+          className={`min-h-11 rounded-full px-4 text-sm ${currentUnit === unit.id ? "bg-stone-900 text-[#f4efe6]" : "border border-stone-300"}`}
+        >
+          {unit.title}
+        </button>
+      ))}
     </div>
   );
 }
@@ -111,10 +117,9 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 function hubBack(path: string) {
-  if (path.startsWith("/career") || path === "/career/final") return "/unit/career";
-  if (path.startsWith("/env") || path === "/env/final") return "/unit/environmental";
-  if (path.startsWith("/module") || path === "/final") return "/unit/family";
   if (path.startsWith("/unit/")) return "/";
+  const unit = unitForPath(path);
+  if (unit) return unitById(unit).hubHref;
   if (typeof sessionStorage !== "undefined") return sessionStorage.getItem("eq-hub") || "/";
   return "/";
 }

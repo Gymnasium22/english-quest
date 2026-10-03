@@ -1,126 +1,13 @@
 "use client";
 
-import { MODULES, type ModuleId } from "@/data/unit1";
-import { ENV_MODULES } from "@/data/unit2";
-import { CAREER_MODULES } from "@/data/unit3";
-import { activitiesFor } from "@/lib/questions";
-import { envActivitiesFor } from "@/lib/questions-env";
-import { careerActivitiesFor } from "@/lib/questions-career";
 import { usePathname } from "next/navigation";
 import { createContext, createElement, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import type { ModuleId } from "@/data/module-ids";
+import { emptyProgress, loadProgress, today, type ProgressState } from "@/lib/progress-state";
+import { CURRENT_UNIT_KEY, UNITS, awardFor, unitById, unitForPath, type QuestUnit, type UnitSpec } from "@/lib/units";
 
-export type ItemStat = { correct: number; wrong: number; practice: boolean };
-export type ProgressState = {
-  name: string;
-  xp: number;
-  bestStreak: number;
-  combo: number;
-  dayStreak: number;
-  lastDay: string;
-  completed: string[];
-  items: Record<string, ItemStat>;
-  achievements: string[];
-  finalDone: boolean;
-  reduceMotion: boolean;
-  cursors: Record<string, number>;
-};
-
-const KEY1 = "english-quest-unit1";
-const KEY2 = "english-quest-unit2";
-const KEY3 = "english-quest-unit3";
-const CURRENT = "english-quest-current-unit";
-
-const empty = (): ProgressState => ({
-  name: "Ученик",
-  xp: 0,
-  bestStreak: 0,
-  combo: 0,
-  dayStreak: 0,
-  lastDay: "",
-  completed: [],
-  items: {},
-  achievements: [],
-  finalDone: false,
-  reduceMotion: false,
-  cursors: {},
-});
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function loadKey(key: string): ProgressState {
-  if (typeof window === "undefined") return empty();
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return empty();
-    const parsed = { ...empty(), ...JSON.parse(raw) };
-    if (!parsed.name || parsed.name === "Learner") parsed.name = "Ученик";
-    return parsed;
-  } catch {
-    return empty();
-  }
-}
-
-export type QuestUnit = "unit1" | "unit2" | "unit3";
-
-function actsFor(unit: QuestUnit, id: string) {
-  if (unit === "unit3") return careerActivitiesFor(id);
-  if (unit === "unit2") return envActivitiesFor(id);
-  return activitiesFor(id);
-}
-
-function mods(unit: QuestUnit) {
-  if (unit === "unit3") return CAREER_MODULES;
-  if (unit === "unit2") return ENV_MODULES;
-  return MODULES;
-}
-
-function awardFamily(s: ProgressState): string[] {
-  const got = new Set(s.achievements);
-  const add = (id: string) => got.add(id);
-  const any = Object.values(s.items).some((i) => i.correct + i.wrong > 0) || s.completed.length > 0;
-  if (any) add("first-step");
-  const vocabCorrect = Object.values(s.items).filter((st) => st.correct >= 2).length;
-  if (vocabCorrect >= 20) add("vocab-master");
-  const done = (mod: ModuleId) => activitiesFor(mod).every((a) => s.completed.includes(`${mod}/${a.id}`));
-  if (done("idioms")) add("phrase-hunter");
-  if (done("collocations")) add("collocation-pro");
-  if (done("word-building")) add("word-builder");
-  if (done("prepositions")) add("prep-pro");
-  if (s.finalDone) add("family-quest");
-  return [...got];
-}
-
-function awardEnv(s: ProgressState): string[] {
-  const got = new Set(s.achievements);
-  const add = (id: string) => got.add(id);
-  const any = Object.values(s.items).some((i) => i.correct + i.wrong > 0) || s.completed.length > 0;
-  if (any) add("first-forecast");
-  const vocabCorrect = Object.values(s.items).filter((st) => st.correct >= 2).length;
-  if (vocabCorrect >= 15) add("nature-vocab");
-  const done = (mod: string) => envActivitiesFor(mod).every((a) => s.completed.includes(`${mod}/${a.id}`));
-  if (done("idioms")) add("idiom-ranger");
-  if (done("collocations")) add("collocation-climate");
-  if (done("word-building")) add("word-family");
-  if (s.finalDone) add("nature-quest");
-  return [...got];
-}
-
-function awardCareer(s: ProgressState): string[] {
-  const got = new Set(s.achievements);
-  const add = (id: string) => got.add(id);
-  const any = Object.values(s.items).some((i) => i.correct + i.wrong > 0) || s.completed.length > 0;
-  if (any) add("first-apply");
-  const vocabCorrect = Object.values(s.items).filter((st) => st.correct >= 2).length;
-  if (vocabCorrect >= 15) add("career-vocab");
-  const done = (mod: string) => careerActivitiesFor(mod).every((a) => s.completed.includes(`${mod}/${a.id}`));
-  if (done("idioms")) add("career-idioms");
-  if (done("collocations")) add("career-perks");
-  if (done("word-building")) add("career-forms");
-  if (s.finalDone) add("career-quest");
-  return [...got];
-}
+export type { ItemStat, ProgressState } from "@/lib/progress-state";
+export type { QuestUnit } from "@/lib/units";
 
 type Api = {
   state: ProgressState;
@@ -151,108 +38,93 @@ type Api = {
 
 const Ctx = createContext<Api | null>(null);
 
-function unitPct(s: ProgressState, unit: QuestUnit) {
-  const list = mods(unit);
-  const vals = list.map((m) => {
-    const acts = actsFor(unit, m.id);
+function unitPct(state: ProgressState, spec: UnitSpec): number {
+  const vals = spec.modules.map((module) => {
+    const acts = spec.activitiesFor(module.id);
     if (!acts.length) return 0;
-    return acts.filter((a) => s.completed.includes(`${m.id}/${a.id}`)).length / acts.length;
+    return acts.filter((activity) => state.completed.includes(`${module.id}/${activity.id}`)).length / acts.length;
   });
-  const base = Math.round((vals.reduce((a, b) => a + b, 0) / list.length) * 100);
-  return s.finalDone ? 100 : base;
+  const base = Math.round((vals.reduce((a, b) => a + b, 0) / spec.modules.length) * 100);
+  return state.finalDone ? 100 : base;
+}
+
+function initialStates(): Record<QuestUnit, ProgressState> {
+  return Object.fromEntries(UNITS.map((unit) => [unit.id, emptyProgress()])) as Record<QuestUnit, ProgressState>;
+}
+
+function mapStates(
+  states: Record<QuestUnit, ProgressState>,
+  fn: (state: ProgressState) => ProgressState,
+): Record<QuestUnit, ProgressState> {
+  return Object.fromEntries(UNITS.map((unit) => [unit.id, fn(states[unit.id])])) as Record<QuestUnit, ProgressState>;
 }
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
   const path = usePathname() ?? "/";
-  const [family, setFamily] = useState<ProgressState>(empty);
-  const [env, setEnv] = useState<ProgressState>(empty);
-  const [career, setCareer] = useState<ProgressState>(empty);
+  const [states, setStates] = useState<Record<QuestUnit, ProgressState>>(initialStates);
   const [currentUnit, setCurrentUnit] = useState<QuestUnit>("unit1");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const f = loadKey(KEY1);
-    const e = loadKey(KEY2);
-    const c = loadKey(KEY3);
-    const stored = (localStorage.getItem(CURRENT) as QuestUnit) || "unit1";
-    setFamily(f);
-    setEnv(e);
-    setCareer(c);
-    // Юнит из адреса выставляет следующий эффект (он зависит от path): на общих
-    // страницах остаётся сохранённый юнит, поэтому сам path здесь не нужен.
+    const loaded = {} as Record<QuestUnit, ProgressState>;
+    for (const unit of UNITS) loaded[unit.id] = loadProgress(unit.storageKey);
+    const stored = (localStorage.getItem(CURRENT_UNIT_KEY) as QuestUnit) || "unit1";
+    setStates(loaded);
+    // Юнит из адреса выставляет следующий эффект: на общих страницах остаётся сохранённый.
     setCurrentUnit(stored);
-    localStorage.setItem(CURRENT, stored);
+    localStorage.setItem(CURRENT_UNIT_KEY, stored);
     setReady(true);
   }, []);
 
   useEffect(() => {
-    if (path.startsWith("/unit/career") || path.startsWith("/career")) {
-      localStorage.setItem(CURRENT, "unit3");
-      setCurrentUnit("unit3");
-      return;
-    }
-    if (path.startsWith("/unit/environmental") || path.startsWith("/env")) {
-      localStorage.setItem(CURRENT, "unit2");
-      setCurrentUnit("unit2");
-      return;
-    }
-    if (path.startsWith("/unit/family") || path.startsWith("/module") || path === "/final") {
-      localStorage.setItem(CURRENT, "unit1");
-      setCurrentUnit("unit1");
-    }
+    const fromPath = unitForPath(path);
+    if (!fromPath) return;
+    localStorage.setItem(CURRENT_UNIT_KEY, fromPath);
+    setCurrentUnit(fromPath);
   }, [path]);
 
   useEffect(() => {
-    if (ready) localStorage.setItem(KEY1, JSON.stringify(family));
-  }, [family, ready]);
-  useEffect(() => {
-    if (ready) localStorage.setItem(KEY2, JSON.stringify(env));
-  }, [env, ready]);
-  useEffect(() => {
-    if (ready) localStorage.setItem(KEY3, JSON.stringify(career));
-  }, [career, ready]);
-
-  const state = currentUnit === "unit3" ? career : currentUnit === "unit2" ? env : family;
-  const setState = currentUnit === "unit3" ? setCareer : currentUnit === "unit2" ? setEnv : setFamily;
-  const award = currentUnit === "unit3" ? awardCareer : currentUnit === "unit2" ? awardEnv : awardFamily;
+    if (!ready) return;
+    for (const unit of UNITS) localStorage.setItem(unit.storageKey, JSON.stringify(states[unit.id]));
+  }, [states, ready]);
 
   const api = useMemo<Api>(() => {
+    const current = states[currentUnit];
+    const spec = unitById(currentUnit);
+    const update = (updater: (state: ProgressState) => ProgressState) =>
+      setStates((prev) => ({ ...prev, [currentUnit]: updater(prev[currentUnit]) }));
+    const award = (state: ProgressState) => awardFor(currentUnit, state);
+
     const moduleProgress = (id: ModuleId) => {
-      const acts = actsFor(currentUnit, id);
+      const acts = spec.activitiesFor(id);
       if (!acts.length) return 0;
-      const n = acts.filter((a) => state.completed.includes(`${id}/${a.id}`)).length;
-      return Math.round((n / acts.length) * 100);
+      const done = acts.filter((activity) => current.completed.includes(`${id}/${activity.id}`)).length;
+      return Math.round((done / acts.length) * 100);
     };
-    const practiceIds = Object.entries(state.items)
-      .filter(([, st]) => st.practice || st.wrong > st.correct)
+    const practiceIds = Object.entries(current.items)
+      .filter(([, item]) => item.practice || item.wrong > item.correct)
       .map(([id]) => id);
-    const masteredIds = Object.entries(state.items)
-      .filter(([, st]) => !st.practice && st.correct >= 2 && st.correct > st.wrong)
+    const masteredIds = Object.entries(current.items)
+      .filter(([, item]) => !item.practice && item.correct >= 2 && item.correct > item.wrong)
       .map(([id]) => id);
-    const list = mods(currentUnit);
+
     return {
-      state,
-      family,
-      env,
-      career,
+      state: current,
+      family: states.unit1,
+      env: states.unit2,
+      career: states.unit3,
       currentUnit,
-      headerXp: family.xp + env.xp + career.xp,
+      headerXp: states.unit1.xp + states.unit2.xp + states.unit3.xp,
       ready,
       setName: (name) => {
         const n = name.trim().slice(0, 24) || "Ученик";
-        setFamily((s) => ({ ...s, name: n }));
-        setEnv((s) => ({ ...s, name: n }));
-        setCareer((s) => ({ ...s, name: n }));
+        setStates((prev) => mapStates(prev, (state) => ({ ...state, name: n })));
       },
-      setMotion: (reduceMotion) => {
-        setFamily((s) => ({ ...s, reduceMotion }));
-        setEnv((s) => ({ ...s, reduceMotion }));
-        setCareer((s) => ({ ...s, reduceMotion }));
-      },
+      setMotion: (reduceMotion) => setStates((prev) => mapStates(prev, (state) => ({ ...state, reduceMotion }))),
       record: (itemIds, correct, practiceFlag, awardXp = true) => {
         let gained = 0;
-        setState((s) => {
-          const items = { ...s.items };
+        update((state) => {
+          const items = { ...state.items };
           itemIds.forEach((id) => {
             const prev = items[id] ?? { correct: 0, wrong: 0, practice: false };
             items[id] = {
@@ -261,23 +133,23 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
               practice: practiceFlag ?? (correct ? false : true),
             };
           });
-          const alreadyCorrect = itemIds.every((id) => (s.items[id]?.correct ?? 0) > 0);
+          const alreadyCorrect = itemIds.every((id) => (state.items[id]?.correct ?? 0) > 0);
           if (!awardXp) {
-            const next = { ...s, items };
+            const next = { ...state, items };
             next.achievements = award(next);
             return next;
           }
-          const combo = correct ? (s.combo ?? 0) + 1 : 0;
+          const combo = correct ? (state.combo ?? 0) + 1 : 0;
           const bonus = correct && combo > 0 && combo % 3 === 0 ? 5 : 0;
           gained = correct && !alreadyCorrect ? 10 + bonus : 0;
           const next = {
-            ...s,
+            ...state,
             combo,
-            bestStreak: Math.max(s.bestStreak, combo),
-            xp: s.xp + gained,
+            bestStreak: Math.max(state.bestStreak, combo),
+            xp: state.xp + gained,
             items,
             lastDay: today(),
-            dayStreak: s.lastDay === today() ? Math.max(s.dayStreak, 1) : s.lastDay ? s.dayStreak + 1 : 1,
+            dayStreak: state.lastDay === today() ? Math.max(state.dayStreak, 1) : state.lastDay ? state.dayStreak + 1 : 1,
           };
           next.achievements = award(next);
           return next;
@@ -285,40 +157,41 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         return gained;
       },
       completeActivity: (key) =>
-        setState((s) => {
-          const completed = s.completed.includes(key) ? s.completed : [...s.completed, key];
-          const bonus = s.completed.includes(key) ? 0 : 25;
-          const next = { ...s, completed, xp: s.xp + bonus, lastDay: today() };
+        update((state) => {
+          const completed = state.completed.includes(key) ? state.completed : [...state.completed, key];
+          const bonus = state.completed.includes(key) ? 0 : 25;
+          const next = { ...state, completed, xp: state.xp + bonus, lastDay: today() };
           next.achievements = award(next);
           return next;
         }),
       completeFinal: () =>
-        setState((s) => {
-          const next = { ...s, finalDone: true, xp: s.xp + (s.finalDone ? 0 : 50), lastDay: today() };
+        update((state) => {
+          const next = { ...state, finalDone: true, xp: state.xp + (state.finalDone ? 0 : 50), lastDay: today() };
           next.achievements = award(next);
           return next;
         }),
-      setCursor: (key, step) => setState((s) => ({ ...s, cursors: { ...s.cursors, [key]: step } })),
-      reset: () => {
-        setFamily((s) => ({ ...empty(), name: s.name, reduceMotion: s.reduceMotion }));
-        setEnv((s) => ({ ...empty(), name: s.name, reduceMotion: s.reduceMotion }));
-        setCareer((s) => ({ ...empty(), name: s.name, reduceMotion: s.reduceMotion }));
-      },
-      finalReady: list.every((m) => actsFor(currentUnit, m.id).some((a) => state.completed.includes(`${m.id}/${a.id}`))),
-      tasksLeftForFinal: list.filter((m) => !actsFor(currentUnit, m.id).some((a) => state.completed.includes(`${m.id}/${a.id}`))).length,
+      setCursor: (key, step) => update((state) => ({ ...state, cursors: { ...state.cursors, [key]: step } })),
+      reset: () =>
+        setStates((prev) => mapStates(prev, (state) => ({ ...emptyProgress(), name: state.name, reduceMotion: state.reduceMotion }))),
+      finalReady: spec.modules.every((module) =>
+        spec.activitiesFor(module.id).some((activity) => current.completed.includes(`${module.id}/${activity.id}`)),
+      ),
+      tasksLeftForFinal: spec.modules.filter(
+        (module) => !spec.activitiesFor(module.id).some((activity) => current.completed.includes(`${module.id}/${activity.id}`)),
+      ).length,
       moduleProgress,
-      unitProgress: unitPct(state, currentUnit),
-      familyProgress: unitPct(family, "unit1"),
-      envProgress: unitPct(env, "unit2"),
-      careerProgress: unitPct(career, "unit3"),
+      unitProgress: unitPct(current, spec),
+      familyProgress: unitPct(states.unit1, unitById("unit1")),
+      envProgress: unitPct(states.unit2, unitById("unit2")),
+      careerProgress: unitPct(states.unit3, unitById("unit3")),
       practiceIds,
       masteredIds,
       selectUnit: (u) => {
-        localStorage.setItem(CURRENT, u);
+        localStorage.setItem(CURRENT_UNIT_KEY, u);
         setCurrentUnit(u);
       },
     };
-  }, [state, ready, currentUnit, family, env, career, award, setState]);
+  }, [states, ready, currentUnit]);
 
   return createElement(Ctx.Provider, { value: api }, children);
 }
@@ -328,31 +201,3 @@ export function useProgress() {
   if (!ctx) throw new Error("progress");
   return ctx;
 }
-
-export const ACHIEVEMENTS = [
-  { id: "first-step", title: "First Step", text: "Первое выполненное задание." },
-  { id: "vocab-master", title: "Vocab Master", text: "Двадцать слов и выражений, которые вы верно вспомнили дважды." },
-  { id: "phrase-hunter", title: "Phrase Hunter", text: "Завершён раздел Idioms & Phrasal Verbs." },
-  { id: "collocation-pro", title: "Collocation Pro", text: "Завершён Collocation Collection." },
-  { id: "word-builder", title: "Word Builder", text: "Завершён Word Building." },
-  { id: "prep-pro", title: "Prep Pro", text: "Завершён модуль Prepositional Phrases." },
-  { id: "family-quest", title: "Family Quest Complete", text: "Пройден весь Unit 1." },
-];
-
-export const ACHIEVEMENTS_ENV = [
-  { id: "first-forecast", title: "First Forecast", text: "Первое выполненное задание юнита Environmental Issues." },
-  { id: "nature-vocab", title: "Nature Vocab", text: "Пятнадцать единиц с повторно верными ответами." },
-  { id: "idiom-ranger", title: "Idiom Ranger", text: "Завершён модуль Idioms & Phrasal Verbs." },
-  { id: "collocation-climate", title: "Collocation Climate", text: "Завершён модуль Collocations." },
-  { id: "word-family", title: "Word Family", text: "Завершён модуль Word Building." },
-  { id: "nature-quest", title: "Nature Quest Complete", text: "Пройден юнит Environmental Issues." },
-];
-
-export const ACHIEVEMENTS_CAREER = [
-  { id: "first-apply", title: "First Apply", text: "Первое выполненное задание юнита Choosing a Career." },
-  { id: "career-vocab", title: "Career Vocab", text: "Пятнадцать единиц с повторно верными ответами." },
-  { id: "career-idioms", title: "Work Phrases", text: "Завершён модуль Idioms & Phrasal Verbs." },
-  { id: "career-perks", title: "Perks Pro", text: "Завершён модуль Collocations." },
-  { id: "career-forms", title: "Career Forms", text: "Завершён модуль Word Building." },
-  { id: "career-quest", title: "Career Quest Complete", text: "Пройден юнит Choosing a Career." },
-];

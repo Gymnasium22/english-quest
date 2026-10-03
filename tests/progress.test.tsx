@@ -102,4 +102,17 @@ describe("начисление XP", () => {
     expect(api?.state.items.adult?.wrong).toBe(1);
     expect(api?.practiceIds).toContain("adult");
   });
+
+  it("сохраняет прогресс в прежние ключи localStorage", async () => {
+    setup([choice], "vocabulary/test-choice");
+    await ready();
+
+    fireEvent.click(screen.getByText("взрослый"));
+    await waitFor(() => expect(xp()).toBe(10));
+
+    await waitFor(() => expect(localStorage.getItem("english-quest-unit1")).toBeTruthy());
+    const saved = JSON.parse(localStorage.getItem("english-quest-unit1") ?? "{}") as { xp?: number };
+    expect(saved.xp).toBe(10);
+    expect(localStorage.getItem("english-quest-current-unit")).toBe("unit1");
+  });
 });
