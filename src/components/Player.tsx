@@ -6,6 +6,7 @@ import { MODULES } from "@/data/unit1";
 import type { ModuleId } from "@/data/module-ids";
 import { copyFor, type Question } from "@/lib/questions";
 import { useProgress } from "@/lib/progress";
+import { ALL_ACHIEVEMENTS, SERIES_AWARD, seriesUnlocked } from "@/lib/units";
 import { HintIcon } from "@/components/Marks";
 import { useGrading } from "@/components/player/useGrading";
 import { useQuestionSession, shuffled } from "@/components/player/useQuestionSession";
@@ -36,7 +37,7 @@ export function Player({
   moduleList?: readonly { id: ModuleId; title: string }[];
 }) {
   const list = moduleList ?? MODULES;
-  const { record, completeActivity, completeFinal, setCursor, state, ready, practiceIds, masteredIds, moduleProgress } = useProgress();
+  const { record, completeActivity, completeFinal, setCursor, state, ready, practiceIds, masteredIds, moduleProgress, family, env, career } = useProgress();
   const grading = useGrading({ state, activityKey, record });
   const flow = useQuestionSession({
     questions,
@@ -78,11 +79,15 @@ export function Player({
   } = flow;
   const { ok, pending, gain, session, resume, grade, miss } = grading;
   const startXp = useRef<number | null>(null);
+  const startAwards = useRef<string[] | null>(null);
+  const startSeries = useRef<boolean | null>(null);
   const text = q ? (copy ?? copyFor(q)) : null;
 
   useEffect(() => {
     if (startXp.current === null && ready) startXp.current = state.xp;
-  }, [ready, state.xp]);
+    if (startAwards.current === null && ready) startAwards.current = state.achievements;
+    if (startSeries.current === null && ready) startSeries.current = seriesUnlocked([family.dayStreak, env.dayStreak, career.dayStreak]);
+  }, [ready, state.xp, state.achievements, family.dayStreak, env.dayStreak, career.dayStreak]);
 
   if (!deck.length) {
     return <p className="glass rounded-3xl p-6">Здесь пока нечего повторять. Сначала пройдите задания и вернитесь сюда.</p>;
@@ -105,10 +110,20 @@ export function Player({
   if (finished) {
     const gained = Math.max(0, state.xp - (startXp.current ?? state.xp));
     const accuracy = session.asked ? Math.round((session.correct / session.asked) * 100) : 0;
+    const fresh = state.achievements.filter((id) => !(startAwards.current ?? []).includes(id));
+    const names = fresh.map((id) => ALL_ACHIEVEMENTS.find((a) => a.id === id)?.title).filter(Boolean);
+    const seriesNow = seriesUnlocked([family.dayStreak, env.dayStreak, career.dayStreak]);
+    if (seriesNow && startSeries.current === false) names.push(SERIES_AWARD.title);
     return (
       <section className="glass rise rounded-3xl p-6 sm:p-10">
         <p className="text-xs tracking-[0.2em] text-stone-500">ГОТОВО</p>
         <h2 className="mt-2 text-4xl">{finalMode ? "Юнит пройден" : title}</h2>
+        {names.length ? (
+          <p className="mt-3 text-stone-800">
+            Открыто: {names.join(", ")}{" "}
+            <Link href="/achievements" className="underline underline-offset-4">К наградам</Link>
+          </p>
+        ) : null}
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl bg-white/80 p-4"><div className="text-xs text-stone-500">XP за серию</div><div className="text-3xl">+{gained}</div></div>
           <div className="rounded-2xl bg-white/80 p-4"><div className="text-xs text-stone-500">Точность</div><div className="text-3xl">{accuracy}%</div></div>

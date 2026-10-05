@@ -38,7 +38,7 @@ import {
   findCareerActivity,
 } from "@/lib/questions-career";
 import type { ProgressState } from "@/lib/progress-state";
-import { findListening } from "@/data/listening";
+import { findListening, listeningForUnit } from "@/data/listening";
 
 export type QuestUnit = "unit1" | "unit2" | "unit3";
 
@@ -53,7 +53,7 @@ export type UnitModule = {
   countLabel: string;
 };
 
-export type AchievementDef = { id: string; title: string; text: string };
+export type AchievementDef = { id: string; title: string; titleEn?: string; text: string; kind?: "final" };
 
 export type UnitBrand = { kicker: string; title: string; sub: string };
 
@@ -89,6 +89,7 @@ type AwardRule = {
   vocab: string;
   vocabThreshold: number;
   moduleAchievements: readonly (readonly [ModuleId, string])[];
+  listen: string;
   final: string;
 };
 
@@ -100,9 +101,10 @@ const AWARD_RULES: Record<QuestUnit, AwardRule> = {
     moduleAchievements: [
       ["idioms", "phrase-hunter"],
       ["collocations", "collocation-pro"],
-      ["word-building", "word-builder"],
       ["prepositions", "prep-pro"],
+      ["word-building", "word-builder"],
     ],
+    listen: "listen-family",
     final: "family-quest",
   },
   unit2: {
@@ -112,8 +114,10 @@ const AWARD_RULES: Record<QuestUnit, AwardRule> = {
     moduleAchievements: [
       ["idioms", "idiom-ranger"],
       ["collocations", "collocation-climate"],
+      ["prepositions", "prep-climate"],
       ["word-building", "word-family"],
     ],
+    listen: "listen-env",
     final: "nature-quest",
   },
   unit3: {
@@ -123,8 +127,10 @@ const AWARD_RULES: Record<QuestUnit, AwardRule> = {
     moduleAchievements: [
       ["idioms", "career-idioms"],
       ["collocations", "career-perks"],
+      ["prepositions", "career-prep"],
       ["word-building", "career-forms"],
     ],
+    listen: "listen-career",
     final: "career-quest",
   },
 };
@@ -147,13 +153,14 @@ const UNIT1: UnitSpec = {
   itemLabel,
   matchesPath: (path) => path.startsWith("/unit/family") || path.startsWith("/module") || path === "/final",
   achievements: [
-    { id: "first-step", title: "First Step", text: "Первое выполненное задание." },
-    { id: "vocab-master", title: "Vocab Master", text: "Двадцать слов и выражений, которые вы верно вспомнили дважды." },
-    { id: "phrase-hunter", title: "Phrase Hunter", text: "Завершён раздел Idioms & Phrasal Verbs." },
-    { id: "collocation-pro", title: "Collocation Pro", text: "Завершён Collocation Collection." },
-    { id: "word-builder", title: "Word Builder", text: "Завершён Word Building." },
-    { id: "prep-pro", title: "Prep Pro", text: "Завершён модуль Prepositional Phrases." },
-    { id: "family-quest", title: "Family Quest Complete", text: "Пройден весь Unit 1." },
+    { id: "first-step", title: "Первый шаг", titleEn: "First Step", text: "Первый верный ответ в юните Family." },
+    { id: "vocab-master", title: "Словарь", titleEn: "Vocab Master", text: "20 единиц с повторно верным ответом." },
+    { id: "phrase-hunter", title: "Идиомы", titleEn: "Phrase Hunter", text: "Завершён модуль Idioms & Phrasal Verbs." },
+    { id: "collocation-pro", title: "Коллокации", titleEn: "Collocation Pro", text: "Завершён модуль Collocations." },
+    { id: "prep-pro", title: "Предлоги", titleEn: "Prep Pro", text: "Завершён модуль Prepositional Phrases." },
+    { id: "word-builder", title: "Словообразование", titleEn: "Word Builder", text: "Завершён модуль Word Building." },
+    { id: "listen-family", title: "Аудирование", titleEn: "Listening", text: "Прослушаны и отвечены все 4 ролика юнита." },
+    { id: "family-quest", title: "Юнит пройден", titleEn: "Family Quest Complete", text: "Пройден финал Unit 1.", kind: "final" },
   ],
 };
 
@@ -175,12 +182,14 @@ const UNIT2: UnitSpec = {
   itemLabel: envItemLabel,
   matchesPath: (path) => path.startsWith("/unit/environmental") || path.startsWith("/env"),
   achievements: [
-    { id: "first-forecast", title: "First Forecast", text: "Первое выполненное задание юнита Environmental Issues." },
-    { id: "nature-vocab", title: "Nature Vocab", text: "Пятнадцать единиц с повторно верными ответами." },
-    { id: "idiom-ranger", title: "Idiom Ranger", text: "Завершён модуль Idioms & Phrasal Verbs." },
-    { id: "collocation-climate", title: "Collocation Climate", text: "Завершён модуль Collocations." },
-    { id: "word-family", title: "Word Family", text: "Завершён модуль Word Building." },
-    { id: "nature-quest", title: "Nature Quest Complete", text: "Пройден юнит Environmental Issues." },
+    { id: "first-forecast", title: "Первый шаг", titleEn: "First Forecast", text: "Первый верный ответ в юните Environmental Issues." },
+    { id: "nature-vocab", title: "Словарь", titleEn: "Nature Vocab", text: "15 единиц с повторно верным ответом." },
+    { id: "idiom-ranger", title: "Идиомы", titleEn: "Idiom Ranger", text: "Завершён модуль Idioms & Phrasal Verbs." },
+    { id: "collocation-climate", title: "Коллокации", titleEn: "Collocation Climate", text: "Завершён модуль Collocations." },
+    { id: "prep-climate", title: "Предлоги", titleEn: "Prep Pro", text: "Завершён модуль Prepositional Phrases." },
+    { id: "word-family", title: "Словообразование", titleEn: "Word Family", text: "Завершён модуль Word Building." },
+    { id: "listen-env", title: "Аудирование", titleEn: "Listening", text: "Прослушаны и отвечены все 4 ролика юнита." },
+    { id: "nature-quest", title: "Юнит пройден", titleEn: "Nature Quest Complete", text: "Пройден финал Unit 2.", kind: "final" },
   ],
 };
 
@@ -202,12 +211,14 @@ const UNIT3: UnitSpec = {
   itemLabel: careerItemLabel,
   matchesPath: (path) => path.startsWith("/unit/career") || path.startsWith("/career"),
   achievements: [
-    { id: "first-apply", title: "First Apply", text: "Первое выполненное задание юнита Choosing a Career." },
-    { id: "career-vocab", title: "Career Vocab", text: "Пятнадцать единиц с повторно верными ответами." },
-    { id: "career-idioms", title: "Work Phrases", text: "Завершён модуль Idioms & Phrasal Verbs." },
-    { id: "career-perks", title: "Perks Pro", text: "Завершён модуль Collocations." },
-    { id: "career-forms", title: "Career Forms", text: "Завершён модуль Word Building." },
-    { id: "career-quest", title: "Career Quest Complete", text: "Пройден юнит Choosing a Career." },
+    { id: "first-apply", title: "Первый шаг", titleEn: "First Apply", text: "Первый верный ответ в юните Choosing a Career." },
+    { id: "career-vocab", title: "Словарь", titleEn: "Career Vocab", text: "15 единиц с повторно верным ответом." },
+    { id: "career-idioms", title: "Идиомы", titleEn: "Work Phrases", text: "Завершён модуль Idioms & Phrasal Verbs." },
+    { id: "career-perks", title: "Коллокации", titleEn: "Perks Pro", text: "Завершён модуль Collocations." },
+    { id: "career-prep", title: "Предлоги", titleEn: "Prep Pro", text: "Завершён модуль Prepositional Phrases." },
+    { id: "career-forms", title: "Словообразование", titleEn: "Career Forms", text: "Завершён модуль Word Building." },
+    { id: "listen-career", title: "Аудирование", titleEn: "Listening", text: "Прослушаны и отвечены все 4 ролика юнита." },
+    { id: "career-quest", title: "Юнит пройден", titleEn: "Career Quest Complete", text: "Пройден финал Unit 3.", kind: "final" },
   ],
 };
 
@@ -258,6 +269,43 @@ export function awardFor(unit: QuestUnit, state: ProgressState): string[] {
       got.add(achievement);
     }
   }
+  const tracks = listeningForUnit(unit);
+  if (tracks.length && tracks.every((track) => state.completed.includes(`listen/${track.id}`))) got.add(rule.listen);
   if (state.finalDone) got.add(rule.final);
   return [...got];
+}
+
+export function achievementStatus(unit: QuestUnit, state: ProgressState, id: string): { on: boolean; label: string } {
+  const spec = unitById(unit);
+  const rule = AWARD_RULES[unit];
+  const on = state.achievements.includes(id);
+  if (id === rule.first) {
+    const n = Object.values(state.items).some((item) => item.correct > 0) ? 1 : 0;
+    return { on, label: on ? "Открыто" : `${n} из 1` };
+  }
+  if (id === rule.vocab) {
+    const n = Object.values(state.items).filter((item) => item.correct >= 2).length;
+    return { on, label: on ? "Открыто" : `${Math.min(n, rule.vocabThreshold)} из ${rule.vocabThreshold}` };
+  }
+  if (id === rule.listen) {
+    const tracks = listeningForUnit(unit);
+    const n = tracks.filter((track) => state.completed.includes(`listen/${track.id}`)).length;
+    return { on, label: on ? "Открыто" : `${n} из ${tracks.length} роликов` };
+  }
+  if (id === rule.final) {
+    return { on, label: on ? "Открыто" : "финал ещё не пройден" };
+  }
+  const pair = rule.moduleAchievements.find(([, achievement]) => achievement === id);
+  if (pair) {
+    const acts = spec.activitiesFor(pair[0]);
+    const n = acts.filter((activity) => state.completed.includes(`${pair[0]}/${activity.id}`)).length;
+    return { on, label: on ? "Открыто" : `${n} из ${acts.length} заданий модуля` };
+  }
+  return { on, label: on ? "Открыто" : "ещё не завершён" };
+}
+
+export const SERIES_AWARD = { id: "three-days", title: "3 дня подряд", text: "Заходили в квест три дня подряд." };
+
+export function seriesUnlocked(dayStreaks: number[]): boolean {
+  return Math.max(0, ...dayStreaks) >= 3;
 }
