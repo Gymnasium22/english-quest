@@ -23,7 +23,7 @@ const links = [
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
-  const inTask = /^\/((env|career)\/)?module\/[^/]+\/[^/]+/.test(path);
+  const inTask = /^\/((env|career)\/)?module\/[^/]+\/[^/]+/.test(path) || path.startsWith("/listen/");
   const menu = inTask ? links.filter((l) => l.href !== "/glossary") : links;
   const { state, ready, headerXp, currentUnit } = useProgress();
   const [toast, setToast] = useState<string | null>(null);

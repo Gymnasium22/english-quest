@@ -38,6 +38,7 @@ import {
   findCareerActivity,
 } from "@/lib/questions-career";
 import type { ProgressState } from "@/lib/progress-state";
+import { findListening } from "@/data/listening";
 
 export type QuestUnit = "unit1" | "unit2" | "unit3";
 
@@ -223,6 +224,10 @@ export function unitById(id: QuestUnit): UnitSpec {
 
 /** Юнит, к которому относится адрес; null — оставить сохранённый. */
 export function unitForPath(path: string): QuestUnit | null {
+  if (path.startsWith("/listen/")) {
+    const id = path.slice("/listen/".length);
+    return findListening(id)?.unit ?? null;
+  }
   return UNITS.find((unit) => unit.matchesPath(path))?.id ?? null;
 }
 

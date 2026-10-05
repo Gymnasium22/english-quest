@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { Mark } from "@/components/Marks";
 import { useProgress } from "@/lib/progress";
 import { finalHref, unitById, type QuestUnit } from "@/lib/units";
+import { listeningForUnit } from "@/data/listening";
 
 /**
  * Общий хаб юнита: герой, список модулей и вход в финальное испытание.
@@ -135,6 +136,24 @@ export function UnitHub({ unitId }: { unitId: QuestUnit }) {
             </li>
           );
         })}
+        {(() => {
+          const tracks = listeningForUnit(unitId);
+          const done = tracks.filter((t) => state.completed.includes(`listen/${t.id}`)).length;
+          const wash = spec.modules[0]?.wash ?? "#F8E6D8";
+          return (
+            <li className={cardClass} style={copy.animated ? { animationDelay: `${spec.modules.length * 40}ms`, borderLeftColor: spec.accent } : { borderLeftColor: spec.accent }}>
+              <div className="rounded-2xl p-2" style={{ background: wash }}><Mark tone="blue" accent={spec.accent} /></div>
+              <div>
+                <div className="text-xs tracking-[0.18em]" style={{ color: spec.accent }}>06 · Доступно</div>
+                <h2 className="text-2xl sm:text-3xl">Аудирование</h2>
+                <p className="text-sm text-stone-600">Четыре записи</p>
+                <p className="mt-2 text-sm">{done} из {tracks.length} заданий</p>
+                <div className="mt-2 h-1.5 max-w-xs rounded-full bg-stone-900/10"><div className="h-full rounded-full" style={{ width: `${tracks.length ? Math.round((done / tracks.length) * 100) : 0}%`, background: spec.accent }} /></div>
+              </div>
+              <Link href="/listen" onClick={() => selectUnit(unitId)} className={cardLinkClass} style={{ background: spec.accent }}>Начать</Link>
+            </li>
+          );
+        })()}
         <li className="glass rounded-[1.8rem] p-5 sm:flex sm:items-center sm:justify-between">
           <div>
             <div className="text-xs tracking-[0.18em] text-stone-500">{finalOpen || state.finalDone ? "Доступно" : "Закрыто"}</div>
