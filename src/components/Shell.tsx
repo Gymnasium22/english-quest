@@ -8,9 +8,23 @@ import { ALL_ACHIEVEMENTS, UNITS, unitById, unitForPath, type QuestUnit } from "
 
 const DASHBOARD_BRAND = { kicker: "ENGLISH QUEST", title: "QUEST", sub: "English Quest" };
 
-function brand(path: string, unit: QuestUnit) {
+const SHARED_PATHS = ["/achievements", "/glossary", "/review", "/progress", "/settings", "/quick-practice", "/listen"];
+
+function isSharedPath(path: string) {
+  return SHARED_PATHS.some((p) => path === p);
+}
+
+function brand(path: string, unit: QuestUnit, hub: string | null) {
   if (path === "/") return DASHBOARD_BRAND;
-  return unitById(unitForPath(path) ?? unit).brand;
+  const fromPath = unitForPath(path);
+  if (fromPath) return unitById(fromPath).brand;
+  if (isSharedPath(path)) {
+    if (!hub || hub === "/") return DASHBOARD_BRAND;
+    const fromHub = unitForPath(hub);
+    if (fromHub) return unitById(fromHub).brand;
+    return DASHBOARD_BRAND;
+  }
+  return unitById(unit).brand;
 }
 
 const links = [
@@ -27,11 +41,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const menu = inTask ? links.filter((l) => l.href !== "/glossary") : links;
   const { state, ready, headerXp, currentUnit } = useProgress();
   const [toast, setToast] = useState<string | null>(null);
+  const [hub, setHub] = useState<string | null>(null);
   const seen = useRef<string[] | null>(null);
   useEffect(() => {
     if (path === "/" || UNITS.some((unit) => unit.hubHref === path)) {
       sessionStorage.setItem("eq-hub", path);
     }
+    setHub(sessionStorage.getItem("eq-hub"));
   }, [path]);
   useEffect(() => {
     if (!ready) return;
@@ -51,9 +67,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <div className="nav-safe mx-auto min-h-screen w-full max-w-6xl px-4 pt-4 sm:px-6">
       <header className="glass rise mb-5 flex items-center justify-between gap-3 rounded-3xl px-4 py-3 sm:px-5">
         <Link href="/" className="min-w-0">
-          <div className="text-[11px] tracking-[0.22em] text-stone-500">{brand(path, currentUnit).kicker}</div>
-          <div className="display truncate text-xl leading-none sm:text-2xl">{brand(path, currentUnit).title}</div>
-          <div className="-mt-0.5 text-sm text-stone-600">{brand(path, currentUnit).sub}</div>
+          <div className="text-[11px] tracking-[0.22em] text-stone-500">{brand(path, currentUnit, hub).kicker}</div>
+          <div className="display truncate text-xl leading-none sm:text-2xl">{brand(path, currentUnit, hub).title}</div>
+          <div className="-mt-0.5 text-sm text-stone-600">{brand(path, currentUnit, hub).sub}</div>
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           {menu.map((l) => (

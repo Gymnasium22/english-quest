@@ -249,8 +249,8 @@ export function awardFor(unit: QuestUnit, state: ProgressState): string[] {
   const spec = unitById(unit);
   const rule = AWARD_RULES[unit];
   const got = new Set(state.achievements);
-  const any = Object.values(state.items).some((item) => item.correct + item.wrong > 0) || state.completed.length > 0;
-  if (any) got.add(rule.first);
+  const anyCorrect = Object.values(state.items).some((item) => item.correct > 0);
+  if (anyCorrect) got.add(rule.first);
   const vocabCorrect = Object.values(state.items).filter((item) => item.correct >= 2).length;
   if (vocabCorrect >= rule.vocabThreshold) got.add(rule.vocab);
   for (const [moduleId, achievement] of rule.moduleAchievements) {
