@@ -152,12 +152,129 @@ export const CAREER_FAMILIES = [
   { id: "train", base: "train", noun: "training", example: "They will train the new staff. / The job includes paid training." },
 ];
 
+export const CAREER_ACTOR_WB = [
+  {
+    id: "actor",
+    base: "actor",
+    forms: [{ english: "actor", ru: "актёр", example: "Barry Keoghan is widely regarded as one of the most talented young actors of his generation." }],
+  },
+  {
+    id: "admire",
+    base: "admire",
+    forms: [
+      { english: "admirer", ru: "поклонник", example: "Lisa’s admirers queued for hours outside the concert venue to see her in person." },
+      { english: "admiration", ru: "восхищение", example: "Fans express their admiration for a celebrity by attending every live show." },
+      { english: "admirable", ru: "восхитительный, достойный восхищения", example: "It is admirable that Little Simz has built her entire career independently." },
+    ],
+  },
+  {
+    id: "adore",
+    base: "adore",
+    forms: [{ english: "adorable", ru: "очаровательный, обаятельный", example: "Fans found it absolutely adorable when the pop star brought her younger sister on stage." }],
+  },
+  {
+    id: "art",
+    base: "art",
+    forms: [
+      { english: "artist", ru: "артист; художник", example: "A real artist continues to create even when no one is watching." },
+      { english: "artistic", ru: "художественный, творческий", example: "Some of the most artistic musicians are not the most commercially successful." },
+      { english: "artistically", ru: "с творческой точки зрения", example: "A performer who develops artistically will always outlast those who simply rely on their initial popularity." },
+    ],
+  },
+  {
+    id: "collect",
+    base: "collect",
+    forms: [
+      { english: "collector", ru: "коллекционер", example: "Tyler, the Creator is a collector of vintage clothing." },
+      { english: "collection", ru: "коллекция", example: "Vampire Weekend shot their music video for Classical among the National Gallery’s art collection." },
+    ],
+  },
+  {
+    id: "compose",
+    base: "compose",
+    forms: [
+      { english: "composer", ru: "композитор", example: "Ludwig Göransson is the composer of the iconic theme from The Mandalorian." },
+      { english: "composition", ru: "музыкальное произведение; сочинение", example: "John Williams’ composition for Star Wars is one of the most instantly recognisable pieces of music ever written." },
+    ],
+  },
+  {
+    id: "dedicate",
+    base: "dedicate",
+    forms: [{ english: "dedication", ru: "преданность делу; посвящение", example: "Meryl Streep’s dedication to her craft is legendary." }],
+  },
+  {
+    id: "define",
+    base: "define",
+    forms: [
+      { english: "definition", ru: "определение; понятие", example: "In today’s world, the definition of being famous has changed completely." },
+      { english: "indefinite", ru: "неопределённый", example: "The album’s release date was listed as indefinite." },
+      { english: "definitely", ru: "определённо, точно", example: "That single is definitely worth a second listen." },
+      { english: "indefinitely", ru: "на неопределённый срок", example: "The event has been postponed indefinitely due to lack of interest." },
+    ],
+  },
+  {
+    id: "edit",
+    base: "edit",
+    forms: [
+      { english: "editor", ru: "редактор", example: "Anna Wintour served as editor-in-chief of American Vogue for 37 years." },
+      { english: "edition", ru: "выпуск, издание; редакция", example: "The limited edition of the album came with a handwritten note from the artist." },
+    ],
+  },
+  {
+    id: "exhibit",
+    base: "exhibit",
+    forms: [
+      { english: "exhibitor", ru: "участник выставки; экспонент", example: "An exhibitor’s success depends not only on the work itself but also on how they present their work." },
+      { english: "exhibition", ru: "выставка, экспозиция", example: "Many celebrities visit art exhibitions privately before they open to the public." },
+    ],
+  },
+  {
+    id: "express",
+    base: "express",
+    forms: [
+      { english: "expression", ru: "выражение", example: "Joaquin Phoenix’s facial expression in Joker communicates depths of emotion." },
+      { english: "expressive", ru: "выразительный", example: "Joaquin Phoenix is one of the most expressive actors of his generation." },
+    ],
+  },
+  {
+    id: "fame",
+    base: "fame",
+    forms: [
+      { english: "famous", ru: "знаменитый, известный", example: "The most famous celebrities often say they feel like themselves when nobody recognises them." },
+      { english: "infamous", ru: "печально известный", example: "Some celebrities become infamous for a single controversial moment." },
+    ],
+  },
+  {
+    id: "fascinate",
+    base: "fascinate",
+    forms: [{ english: "fascination", ru: "восхищение; увлечённость", example: "A celebrity who maintains an air of mystery only deepens their audience’s fascination." }],
+  },
+  {
+    id: "follow",
+    base: "follow",
+    forms: [{ english: "follower", ru: "подписчик; последователь", example: "Gaining a thousand followers feels exciting at first, but keeping their trust is far harder." }],
+  },
+  {
+    id: "success",
+    base: "success",
+    forms: [
+      { english: "successfully", ru: "успешно", example: "The influencer successfully turned her online following into a thriving business." },
+      { english: "unsuccessfully", ru: "безуспешно", example: "The manager unsuccessfully tried to keep the story out of the press." },
+    ],
+  },
+  {
+    id: "true",
+    base: "true",
+    forms: [{ english: "untrue", ru: "неправдивый, ложный", example: "The celebrity’s team released a statement calling the tabloid story completely untrue." }],
+  },
+];
+
 export const CAREER_MODULES = [
   { id: "vocabulary", title: "Vocabulary", kicker: "Слова заявки и работы", href: "/career/module/vocabulary", tone: "orange", accent: "#C4622D", wash: "#F8E6D8", countLabel: "60 единиц" },
   { id: "idioms", title: "Idioms & Phrasal Verbs", kicker: "Опыт работы, увольнение, отказ", href: "/career/module/idioms", tone: "blue", accent: "#2C4C7C", wash: "#E4EAF3", countLabel: "20 выражений" },
   { id: "collocations", title: "Collocations", kicker: "Бенефиты и пакет льгот", href: "/career/module/collocations", tone: "plum", accent: "#5C3D6E", wash: "#EFE6F3", countLabel: "12 сочетаний" },
   { id: "prepositions", title: "Prepositional Phrases", kicker: "Фразы из текстов о плюсах и минусах", href: "/career/module/prepositions", tone: "green", accent: "#3E6B4F", wash: "#E5F0E8", countLabel: "6 фраз" },
-  { id: "word-building", title: "Word Building", kicker: "Карьерные пары слов", href: "/career/module/word-building", tone: "burgundy", accent: "#8E3A3A", wash: "#F6E4E2", countLabel: "11 пар" },
+  { id: "word-building", title: "Word Building", kicker: "Карьера и сцена", href: "/career/module/word-building", tone: "burgundy", accent: "#8E3A3A", wash: "#F6E4E2", countLabel: "11 пар и 30 форм" },
 ] as const;
 
 export type CareerModuleId = (typeof CAREER_MODULES)[number]["id"];

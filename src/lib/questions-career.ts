@@ -1,4 +1,5 @@
 import {
+  CAREER_ACTOR_WB,
   CAREER_COLLOS,
   CAREER_FAMILIES,
   CAREER_IDIOMS,
@@ -210,10 +211,63 @@ function wordActs(): ActivityDef[] {
     answers: [f.noun],
     reveal: `${f.base} → ${f.noun}`,
   }));
+  const actorPool = CAREER_ACTOR_WB.flatMap((g) => g.forms.map((f) => f.english));
+  const actorOpts = (correct: string, family: string[], seed: number) => {
+    const outsider = shuffle(actorPool.filter((x) => !family.includes(x)), seed)[0];
+    const extra = shuffle(family.filter((x) => x !== correct), seed + 1).slice(0, 2);
+    const pad = shuffle(actorPool.filter((x) => x !== correct && x !== outsider && !extra.includes(x)), seed + 2);
+    return shuffle([correct, ...extra, outsider, ...pad].filter((x, i, a) => a.indexOf(x) === i).slice(0, 4), seed + 4);
+  };
+  const actorGap: Question[] = CAREER_ACTOR_WB.flatMap((g, gi) => {
+    const family = g.forms.map((f) => f.english);
+    return g.forms.flatMap((form, fi) => {
+      const gap = blankExample(form.example, form.english);
+      if (!gap) return [];
+      return [{
+        kind: "choice" as const,
+        id: `actor-gap-${g.id}-${form.english}`,
+        itemId: form.english,
+        prompt: `${gap.before}______${gap.after}`,
+        options: actorOpts(form.english, family, gi * 9 + fi + 3),
+        answer: form.english,
+        reveal: form.example,
+      }];
+    });
+  });
+  const actorForm: Question[] = CAREER_ACTOR_WB.flatMap((g, gi) => {
+    const family = g.forms.map((f) => f.english);
+    return g.forms.map((form, fi) => ({
+      kind: "choice" as const,
+      id: `actor-form-${g.id}-${form.english}`,
+      itemId: form.english,
+      prompt: form.ru,
+      options: actorOpts(form.english, family, gi * 7 + fi + 5),
+      answer: form.english,
+      reveal: `${form.english} — ${form.ru}`,
+    }));
+  });
+  const actorOdd: Question[] = CAREER_ACTOR_WB.filter((g) => g.forms.length >= 2).map((g, i) => {
+    const members = g.forms.map((f) => f.english);
+    const outsider = shuffle(actorPool.filter((x) => !members.includes(x)), i + 8)[0];
+    const keep = shuffle(members, i + 2).slice(0, 3);
+    return {
+      kind: "choice" as const,
+      id: `actor-odd-${g.id}`,
+      itemId: g.id,
+      prompt: g.base,
+      detail: "Какая форма не от этой основы?",
+      options: shuffle([...keep, outsider], i + 12),
+      answer: outsider,
+      reveal: `${g.base}: ${members.join(", ")}`,
+    };
+  });
   return [
-    { id: "form", moduleId: "word-building", title: "Form", blurb: "", mechanic: "CHOOSE", heading: "Выберите форму", instruction: "Выберите существительное или связанную форму к базе.", whatToDo: "", hint: "Только карьерные пары, не actor.", questions: form },
+    { id: "form", moduleId: "word-building", title: "Form", blurb: "", mechanic: "CHOOSE", heading: "Выберите форму", instruction: "Выберите существительное или связанную форму к базе.", whatToDo: "", hint: "Только карьерные пары из словаря заявки.", questions: form },
     { id: "odd", moduleId: "word-building", title: "Choose", blurb: "", mechanic: "CHOOSE", heading: "Выберите нужную форму", instruction: "Один вариант подходит к заданию.", whatToDo: "", hint: "advice неисчисляемое.", questions: odd },
     { id: "type", moduleId: "word-building", title: "Type", blurb: "", mechanic: "WORD BUILDING", heading: "Напечатайте форму", instruction: "Введите существительное или связанную форму к этому слову.", whatToDo: "", hint: "apply → application, advise → advice.", questions: type },
+    { id: "actor-gap", moduleId: "word-building", title: "Actor gap", blurb: "", mechanic: "FILL THE GAP", heading: "Вставьте форму в пример", instruction: "Выберите форму, которая подходит в предложение.", whatToDo: "", hint: "Варианты из этой же таблицы актёров и сцены.", questions: actorGap },
+    { id: "actor-form", moduleId: "word-building", title: "Actor form", blurb: "", mechanic: "WORD BUILDING", heading: "Выберите форму по значению", instruction: "Прочитайте русский перевод и выберите английскую форму.", whatToDo: "", hint: "admirable, exhibition, infamous — из этой таблицы.", questions: actorForm },
+    { id: "actor-odd", moduleId: "word-building", title: "Actor odd", blurb: "", mechanic: "CHOOSE", heading: "Найдите лишнюю форму", instruction: "Выберите слово, которое не относится к этой основе.", whatToDo: "", hint: "Три формы одной группы, одна — из другой группы этой таблицы.", questions: actorOdd },
   ];
 }
 
@@ -270,6 +324,10 @@ export function careerItemLabel(id: string): string {
   if (k) return k.english;
   const f = CAREER_FAMILIES.find((x) => x.id === id);
   if (f) return f.base;
+  const a = CAREER_ACTOR_WB.find((x) => x.id === id);
+  if (a) return a.base;
+  const form = CAREER_ACTOR_WB.flatMap((x) => x.forms).find((x) => x.english === id);
+  if (form) return form.english;
   return id;
 }
 

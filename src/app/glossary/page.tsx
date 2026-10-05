@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { COLLOCATIONS, FATHER, PREP_A, PREP_B, SISTERS, SPOTLIGHT_STAY, VOCAB, WORD_FAMILIES } from "@/data/unit1";
 import { ENV_IDIOMS, ENV_PHRASALS, ENV_PREP, ENV_VOCAB } from "@/data/unit2";
-import { CAREER_COLLOS, CAREER_FAMILIES, CAREER_IDIOMS, CAREER_KEY, CAREER_PREP, CAREER_VOCAB } from "@/data/unit3";
+import { CAREER_ACTOR_WB, CAREER_COLLOS, CAREER_FAMILIES, CAREER_IDIOMS, CAREER_KEY, CAREER_PREP, CAREER_VOCAB } from "@/data/unit3";
 import { TopBar, UnitSwitch } from "@/components/Shell";
 import { useProgress } from "@/lib/progress";
 
@@ -61,6 +61,7 @@ export default function GlossaryPage() {
     ...CAREER_PREP.map((v) => ({ id: v.id, en: v.english, ru: v.meaning, group: "Prepositions" })),
     ...CAREER_KEY.map((v) => ({ id: v.id, en: v.english, ru: v.meaning, group: "Key phrases" })),
     ...CAREER_FAMILIES.map((v) => ({ id: v.id, en: `${v.base} → ${v.noun}`, ru: v.example, group: "Word building" })),
+    ...CAREER_ACTOR_WB.flatMap((g) => g.forms.map((f) => ({ id: f.english, en: f.english, ru: f.ru, extra: f.example, group: "Актёры и сцена" }))),
   ], []);
   return (
     <main>
