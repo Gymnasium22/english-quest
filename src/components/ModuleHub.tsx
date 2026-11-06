@@ -43,6 +43,20 @@ const MODULE_HUB_COPY: Record<QuestUnit, ModuleHubCopy> = {
     reviewLink: false,
     needsEmpty: "Пока пусто.",
   },
+  unit4: {
+    kickerUppercase: false,
+    showModuleProgress: false,
+    doneColored: false,
+    reviewLink: false,
+    needsEmpty: "Пока пусто.",
+  },
+  unit6: {
+    kickerUppercase: false,
+    showModuleProgress: false,
+    doneColored: false,
+    reviewLink: false,
+    needsEmpty: "Пока пусто.",
+  },
 };
 
 export function ModuleHub({ unitId }: { unitId: QuestUnit }) {

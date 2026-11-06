@@ -50,6 +50,22 @@ const FINAL_COPY: Record<QuestUnit, FinalCopy> = {
     closedLabel: "К карте юнита",
     onDoneHref: null,
   },
+  unit4: {
+    title: "Final Travel Challenge",
+    intro: "Смешанные задания из модулей словаря и идиом. Это финал Unit 4.",
+    ctaClass: "mt-6 min-h-12 rounded-full bg-[#0F6E6A] px-6 text-white",
+    closedHref: null,
+    closedLabel: "К карте юнита",
+    onDoneHref: null,
+  },
+  unit6: {
+    title: "Final Belarus Challenge",
+    intro: "Смешанные задания из модулей Unit 6. Это финал.",
+    ctaClass: "mt-6 min-h-12 rounded-full bg-[#8E3A3A] px-6 text-white",
+    closedHref: null,
+    closedLabel: "К карте юнита",
+    onDoneHref: null,
+  },
 };
 
 export function FinalScreen({ unitId }: { unitId: QuestUnit }) {

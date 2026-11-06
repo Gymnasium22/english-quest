@@ -76,6 +76,36 @@ const HUB_COPY: Record<QuestUnit, HubCopy> = {
     finalText: "Смешанные задания из всех модулей Unit 3.",
     finalCtaClass: "mt-4 inline-flex min-h-12 items-center rounded-full bg-[#1F4E79] px-6 text-white sm:mt-0",
   },
+  unit4: {
+    heading: (
+      <>
+        Путешествия
+        <br />
+        и отдых
+      </>
+    ),
+    intro: "Два модуля Unit 4: словарь и идиомы. Аудирование финал не открывает.",
+    startLabel: "Начать практику",
+    progressClass: "h-full rounded-full bg-[#0F6E6A]",
+    animated: false,
+    finalTitle: "Final Travel Challenge",
+    finalText: "Смешанные задания из модулей Unit 4.",
+    finalCtaClass: "mt-4 inline-flex min-h-12 items-center rounded-full bg-[#0F6E6A] px-6 text-white sm:mt-0",
+  },
+  unit6: {
+    heading: (
+      <>
+        Беларусь
+      </>
+    ),
+    intro: "Страна, еда и места: словарь, глаголы и коллокации.",
+    startLabel: "Начать практику",
+    progressClass: "h-full rounded-full bg-[#8E3A3A]",
+    animated: false,
+    finalTitle: "Final Belarus Challenge",
+    finalText: "Смешанные задания из модулей Unit 6.",
+    finalCtaClass: "mt-4 inline-flex min-h-12 items-center rounded-full bg-[#8E3A3A] px-6 text-white sm:mt-0",
+  },
 };
 
 const CARD_CLASS = {
@@ -144,9 +174,9 @@ export function UnitHub({ unitId }: { unitId: QuestUnit }) {
             <li className={cardClass} style={copy.animated ? { animationDelay: `${spec.modules.length * 40}ms`, borderLeftColor: spec.accent } : { borderLeftColor: spec.accent }}>
               <div className="rounded-2xl p-2" style={{ background: wash }}><Mark tone="blue" accent={spec.accent} /></div>
               <div>
-                <div className="text-xs tracking-[0.18em]" style={{ color: spec.accent }}>06 · Доступно</div>
+                <div className="text-xs tracking-[0.18em]" style={{ color: spec.accent }}>{String(spec.modules.length + 1).padStart(2, "0")} · Доступно</div>
                 <h2 className="text-2xl sm:text-3xl">Аудирование</h2>
-                <p className="text-sm text-stone-600">Четыре записи</p>
+                <p className="text-sm text-stone-600">{tracks.length === 4 ? "Четыре записи" : `${tracks.length} записей`}</p>
                 <p className="mt-2 text-sm">{done} из {tracks.length} заданий</p>
                 <div className="mt-2 h-1.5 max-w-xs rounded-full bg-stone-900/10"><div className="h-full rounded-full" style={{ width: `${tracks.length ? Math.round((done / tracks.length) * 100) : 0}%`, background: spec.accent }} /></div>
               </div>

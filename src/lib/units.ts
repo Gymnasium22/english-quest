@@ -7,6 +7,8 @@
 import { MODULES } from "@/data/unit1";
 import { ENV_MODULES } from "@/data/unit2";
 import { CAREER_MODULES } from "@/data/unit3";
+import { TOUR_MODULES } from "@/data/unit4";
+import { BY_MODULES } from "@/data/unit6";
 import type { ModuleId } from "@/data/module-ids";
 import {
   activitiesFor,
@@ -37,10 +39,28 @@ import {
   careerReview,
   findCareerActivity,
 } from "@/lib/questions-career";
+import {
+  belarusActivities,
+  belarusActivitiesFor,
+  belarusFinal,
+  belarusItemLabel,
+  belarusQuick,
+  belarusReview,
+  findBelarusActivity,
+} from "@/lib/questions-belarus";
+import {
+  findTourActivity,
+  tourActivities,
+  tourActivitiesFor,
+  tourFinal,
+  tourItemLabel,
+  tourQuick,
+  tourReview,
+} from "@/lib/questions-tour";
 import type { ProgressState } from "@/lib/progress-state";
 import { findListening, listeningForUnit } from "@/data/listening";
 
-export type QuestUnit = "unit1" | "unit2" | "unit3";
+export type QuestUnit = "unit1" | "unit2" | "unit3" | "unit4" | "unit6";
 
 export type UnitModule = {
   id: ModuleId;
@@ -133,6 +153,27 @@ const AWARD_RULES: Record<QuestUnit, AwardRule> = {
     listen: "listen-career",
     final: "career-quest",
   },
+  unit4: {
+    first: "first-trip",
+    vocab: "tour-vocab",
+    vocabThreshold: 15,
+    moduleAchievements: [
+      ["idioms", "tour-idioms"],
+    ],
+    listen: "listen-tour",
+    final: "tour-quest",
+  },
+  unit6: {
+    first: "first-belarus",
+    vocab: "belarus-vocab",
+    vocabThreshold: 15,
+    moduleAchievements: [
+      ["idioms", "belarus-places"],
+      ["collocations", "belarus-table"],
+    ],
+    listen: "listen-belarus",
+    final: "belarus-quest",
+  },
 };
 
 const UNIT1: UnitSpec = {
@@ -222,8 +263,61 @@ const UNIT3: UnitSpec = {
   ],
 };
 
-/** Порядок важен: по нему юнит ищется по адресу и строится список на главной. */
-export const UNITS: readonly UnitSpec[] = [UNIT1, UNIT2, UNIT3];
+const UNIT4: UnitSpec = {
+  id: "unit4",
+  title: "Путешествия и отдых",
+  brand: { kicker: "UNIT 4", title: "TRAVEL", sub: "Путешествия и отдых" },
+  routePrefix: "/tour",
+  hubHref: "/unit/tourism",
+  storageKey: "english-quest-unit4",
+  accent: "#0F6E6A",
+  modules: TOUR_MODULES,
+  activities: tourActivities,
+  activitiesFor: tourActivitiesFor,
+  findActivity: findTourActivity,
+  quick: tourQuick,
+  review: tourReview,
+  final: tourFinal,
+  itemLabel: tourItemLabel,
+  matchesPath: (path) => path.startsWith("/unit/tourism") || path.startsWith("/tour"),
+  achievements: [
+    { id: "first-trip", title: "Первый шаг", titleEn: "First Trip", text: "Первый верный ответ в юните про путешествия." },
+    { id: "tour-vocab", title: "Словарь", titleEn: "Travel Vocab", text: "15 единиц с повторно верным ответом." },
+    { id: "tour-idioms", title: "Идиомы", titleEn: "Travel Phrases", text: "Завершён модуль Idioms." },
+    { id: "listen-tour", title: "Аудирование", titleEn: "Listening", text: "Отвечены все 5 роликов юнита." },
+    { id: "tour-quest", title: "Юнит пройден", titleEn: "Travel Quest Complete", text: "Пройден финал Unit 4.", kind: "final" },
+  ],
+};
+
+const UNIT6: UnitSpec = {
+  id: "unit6",
+  title: "Беларусь",
+  brand: { kicker: "UNIT 6", title: "BELARUS", sub: "Беларусь: страна, еда и места" },
+  routePrefix: "/belarus",
+  hubHref: "/unit/belarus",
+  storageKey: "english-quest-unit6",
+  accent: "#8E3A3A",
+  modules: BY_MODULES,
+  activities: belarusActivities,
+  activitiesFor: belarusActivitiesFor,
+  findActivity: findBelarusActivity,
+  quick: belarusQuick,
+  review: belarusReview,
+  final: belarusFinal,
+  itemLabel: belarusItemLabel,
+  matchesPath: (path) => path.startsWith("/unit/belarus") || path.startsWith("/belarus"),
+  achievements: [
+    { id: "first-belarus", title: "Первый шаг", titleEn: "First Look", text: "Первый верный ответ в юните про Беларусь." },
+    { id: "belarus-vocab", title: "Словарь", titleEn: "Country Vocab", text: "15 единиц с повторно верным ответом." },
+    { id: "belarus-places", title: "Глаголы мест", titleEn: "Places", text: "Завершён модуль Phrasal verbs." },
+    { id: "belarus-table", title: "Еда и приметы", titleEn: "Table", text: "Завершён модуль Collocations." },
+    { id: "listen-belarus", title: "Аудирование", titleEn: "Listening", text: "Отвечены оба ролика юнита." },
+    { id: "belarus-quest", title: "Юнит пройден", titleEn: "Belarus Quest Complete", text: "Пройден финал Unit 6.", kind: "final" },
+  ],
+};
+
+/** Порядок важен: по нему юнит ищется по адресу и строится список на главной. Unit 5 нет. */
+export const UNITS: readonly UnitSpec[] = [UNIT1, UNIT2, UNIT3, UNIT4, UNIT6];
 
 export const ALL_ACHIEVEMENTS: readonly AchievementDef[] = UNITS.flatMap((unit) => [...unit.achievements]);
 

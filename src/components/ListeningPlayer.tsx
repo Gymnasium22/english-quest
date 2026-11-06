@@ -12,6 +12,7 @@ export function ListeningPlayer({ track }: { track: ListeningTrack }) {
   const [progress, setProgress] = useState(0);
   const [showText, setShowText] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [noFile, setNoFile] = useState(false);
   const spec = unitById(track.unit);
   const { state } = useProgress();
   const unlocked = state.completed.includes(`listen/${track.id}`);
@@ -26,13 +27,16 @@ export function ListeningPlayer({ track }: { track: ListeningTrack }) {
     el.addEventListener("loadedmetadata", onTime);
     el.addEventListener("play", onPlay);
     el.addEventListener("pause", onPause);
+    const onError = () => setNoFile(true);
     el.addEventListener("ended", onPause);
+    el.addEventListener("error", onError);
     return () => {
       el.removeEventListener("timeupdate", onTime);
       el.removeEventListener("loadedmetadata", onTime);
       el.removeEventListener("play", onPlay);
       el.removeEventListener("pause", onPause);
       el.removeEventListener("ended", onPause);
+      el.removeEventListener("error", onError);
     };
   }, []);
 
@@ -59,10 +63,11 @@ export function ListeningPlayer({ track }: { track: ListeningTrack }) {
       <section className="glass mb-5 rounded-3xl p-5 sm:p-8">
         <h2 className="text-3xl">{track.title}</h2>
         <audio ref={audioRef} src={track.file} preload="metadata" className="hidden" />
+        {noFile ? <p className="mt-4 text-sm text-stone-600">Запись скоро</p> : null}
         <div className="mt-4 flex flex-wrap gap-3">
-          <button type="button" className="min-h-12 rounded-full bg-stone-900 px-6 text-[#f4efe6]" onClick={play}>Слушать</button>
-          <button type="button" className="min-h-12 rounded-full border border-stone-300 px-6" onClick={pause} disabled={!playing}>Пауза</button>
-          <button type="button" className="min-h-12 rounded-full border border-stone-300 px-6" onClick={replay}>Ещё раз</button>
+          <button type="button" className="min-h-12 rounded-full bg-stone-900 px-6 text-[#f4efe6] disabled:opacity-40" onClick={play} disabled={noFile}>Слушать</button>
+          <button type="button" className="min-h-12 rounded-full border border-stone-300 px-6 disabled:opacity-40" onClick={pause} disabled={noFile || !playing}>Пауза</button>
+          <button type="button" className="min-h-12 rounded-full border border-stone-300 px-6 disabled:opacity-40" onClick={replay} disabled={noFile}>Ещё раз</button>
           {unlocked ? (
             <button type="button" className="min-h-12 rounded-full border border-stone-300 px-6" onClick={() => setShowText((v) => !v)}>{showText ? "Скрыть текст" : "Показать текст"}</button>
           ) : null}

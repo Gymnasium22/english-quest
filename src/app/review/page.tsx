@@ -1,23 +1,22 @@
 "use client";
 
-import { reviewQuestions, itemLabel } from "@/lib/questions";
-import { envItemLabel, envReview } from "@/lib/questions-env";
-import { careerItemLabel, careerReview } from "@/lib/questions-career";
 import { listeningItemLabel, listeningReview } from "@/data/listening";
 import { useProgress } from "@/lib/progress";
 import { Player } from "@/components/Player";
 import { TopBar, UnitSwitch } from "@/components/Shell";
+import { unitById } from "@/lib/units";
 
 export default function ReviewPage() {
   const { practiceIds, state, ready, currentUnit } = useProgress();
-  const base = currentUnit === "unit3" ? careerReview(practiceIds) : currentUnit === "unit2" ? envReview(practiceIds) : reviewQuestions(practiceIds);
+  const spec = unitById(currentUnit);
+  const base = spec.review(practiceIds);
   const questions = [...base, ...listeningReview(currentUnit, practiceIds)];
-  const label = (id: string) => listeningItemLabel(id) ?? (currentUnit === "unit3" ? careerItemLabel(id) : currentUnit === "unit2" ? envItemLabel(id) : itemLabel(id));
+  const label = (id: string) => listeningItemLabel(id) ?? spec.itemLabel(id);
   return (
     <main>
       <TopBar title="Повторение" meta={ready ? (practiceIds.length ? String(practiceIds.length) : "нет слов") : ""} />
       <UnitSwitch />
-      <p className="mb-4 text-sm text-stone-600">Открыт юнит {currentUnit === "unit3" ? "Choosing a Career" : currentUnit === "unit2" ? "Environmental Issues" : "Family"}.</p>
+      <p className="mb-4 text-sm text-stone-600">Открыт юнит {spec.title}.</p>
       {!ready ? <p className="text-sm text-stone-500">Загрузка…</p> : null}
       <ul className="mb-4 grid gap-2">
         {practiceIds.length ? practiceIds.map((id) => (

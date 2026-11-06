@@ -1,8 +1,9 @@
 import type { Question } from "@/lib/questions";
 import { FATHER_TEXT, SISTERS_TEXT } from "@/data/unit1";
 import { FORECAST_TEXT } from "@/data/unit2";
+import { BELARUS_COUNTRY_TEXT, BELARUS_PLACES_TEXT } from "@/data/unit6";
 
-type UnitId = "unit1" | "unit2" | "unit3";
+type UnitId = "unit1" | "unit2" | "unit3" | "unit4" | "unit6";
 
 export type ListeningTrack = {
   id: string;
@@ -160,6 +161,92 @@ export const LISTENING: ListeningTrack[] = [
       q("listen-12-a", "Что помогает командному духу?", ["a common goal", "a bonus", "a vacancy"], "a common goal"),
       q("listen-12-b", "Если человек не вписывается, это может быть…", ["disruptive", "lucrative", "valid"], "disruptive"),
       q("listen-12-c", "Что команда может подавить?", ["individual enterprise and initiative", "holiday", "salary"], "individual enterprise and initiative"),
+    ],
+  },
+  {
+    id: "tour-listen-algarve",
+    unit: "unit4",
+    file: "/listening/tour-listen-algarve.mp3",
+    title: "Unwind on the Algarve",
+    transcript: "Unwind on the Algarve. If you need to unwind, try the Algarve in southern Portugal. Laze around on the golden, sandy beaches, soak up the atmosphere of traditional fishing villages like Alvor, or just go for a wander around Albufeira’s old town, which still retains its wonderful charm.",
+    questions: [
+      q("listen-algarve-a", "Куда ехать, если нужно unwind?", ["the Algarve", "Prague", "rural China"], "the Algarve"),
+      q("listen-algarve-b", "Какая деревня названа?", ["Alvor", "Albufeira only", "Minsk"], "Alvor"),
+      q("listen-algarve-c", "Что сохранил старый город?", ["its wonderful charm", "a castle", "a hotel"], "its wonderful charm"),
+    ],
+  },
+  {
+    id: "tour-listen-china",
+    unit: "unit4",
+    file: "/listening/tour-listen-china.mp3",
+    title: "Off the beaten track",
+    transcript: "Off the beaten track on the Great Wall of China. Our China trek offers a unique experience for the adventurous traveller who wants to get away from it all. Apart from the spectacular scenery, you will have the rare opportunity to camp in a remote part of rural China and experience local life in its most unspoilt state.",
+    questions: [
+      q("listen-china-a", "Где трек?", ["the Great Wall of China", "the Algarve", "Prague"], "the Great Wall of China"),
+      q("listen-china-b", "Чего хочет путешественник?", ["get away from it all", "sit on a beach", "book a city break"], "get away from it all"),
+      q("listen-china-c", "Где можно остановиться лагерем?", ["a remote part of rural China", "a fishing village", "a hotel in town"], "a remote part of rural China"),
+    ],
+  },
+  {
+    id: "tour-listen-prague",
+    unit: "unit4",
+    file: "/listening/tour-listen-prague.mp3",
+    title: "City breaks in Prague",
+    transcript: "City breaks in Prague. Prague is a stunning city, and this thriving capital of the Czech Republic makes a romantic and vibrant city-break destination. A stroll through Prague’s cobbled streets is wonderfully exciting: its architecture is remarkably diverse, and amazingly untouched by the Second World War, although Charles Bridge and the Astronomical Clock have recently been undergoing restoration.",
+    questions: [
+      q("listen-prague-a", "Какой это город?", ["Prague", "Albufeira", "Minsk"], "Prague"),
+      q("listen-prague-b", "Какие улицы?", ["cobbled streets", "motorways", "beaches"], "cobbled streets"),
+      q("listen-prague-c", "Что недавно реставрируют?", ["Charles Bridge and the Astronomical Clock", "the Great Wall", "a fishing village"], "Charles Bridge and the Astronomical Clock"),
+    ],
+  },
+  {
+    id: "tour-listen-britain",
+    unit: "unit4",
+    file: "/listening/tour-listen-britain.mp3",
+    title: "A winter in England",
+    transcript: "Joe Smith: We try to get away in winter and go somewhere warm, but this year we decided to stay in England, and it turned out to be a great success. We booked the hotel in advance — we just set out in the car, took our time, and stopped off whenever we found somewhere nice. After ten days we’d been all over the place. Getting around was so easy with few tourists about, and, it being out of season, we never had a problem finding a hotel. In fact, I got more out of this holiday than one where I just sit on a beach.",
+    questions: [
+      q("listen-britain-a", "Где они остались в этом году?", ["England", "Portugal", "France"], "England"),
+      q("listen-britain-b", "Когда забронировали отель?", ["in advance", "on the last day", "out of season only"], "in advance"),
+      q("listen-britain-c", "Почему легко было найти отель?", ["it was out of season", "the beach was full", "they went on horseback"], "it was out of season"),
+    ],
+  },
+  {
+    id: "tour-listen-riding",
+    unit: "unit4",
+    file: "/listening/tour-listen-riding.mp3",
+    title: "Camping and riding",
+    transcript: "Last year I went away on my own, so this year I thought it would make a change to go with a group. I chose a camping and riding holiday in France with four other people. I’m not very good at roughing it, and although I’d ridden once or twice before, I’d never spent a week on horseback. But I thought, why not? As it happened, the camping was very enjoyable. Everyone did their bit with the camping and the cooking, and riding’s a great way to see the countryside. You get off the beaten track so easily, and it’s lovely being out in the open air. It did me good, and I’d certainly go again.",
+    questions: [
+      q("listen-riding-a", "С кем поехали в этом году?", ["with a group", "alone", "with Joe Smith"], "with a group"),
+      q("listen-riding-b", "Где был отдых?", ["France", "England", "China"], "France"),
+      q("listen-riding-c", "Что делал каждый?", ["did their bit with the camping and the cooking", "booked a hotel", "stayed in the city"], "did their bit with the camping and the cooking"),
+    ],
+  },
+  {
+    id: "by-listen-country",
+    unit: "unit6",
+    file: "/listening/by-listen-country.mp3",
+    title: "Belarus",
+    transcript: BELARUS_COUNTRY_TEXT,
+    questions: [
+      q("listen-by-a", "Какая столица?", ["Minsk", "Grodno", "Brest"], "Minsk"),
+      q("listen-by-b", "С кем есть граница?", ["Russia, Ukraine, Poland, Lithuania and Latvia", "only Russia", "only Poland"], "Russia, Ukraine, Poland, Lithuania and Latvia"),
+      q("listen-by-c", "Какое самое большое озеро?", ["Naroch", "the Braslav lakes", "a river"], "Naroch"),
+      q("listen-by-d", "Сколько областей?", ["six", "five", "seven"], "six"),
+      q("listen-by-e", "Какие официальные языки?", ["Belarusian and Russian", "only Russian", "only Belarusian"], "Belarusian and Russian"),
+    ],
+  },
+  {
+    id: "by-listen-places",
+    unit: "unit6",
+    file: "/listening/by-listen-places.mp3",
+    title: "Places to see",
+    transcript: BELARUS_PLACES_TEXT,
+    questions: [
+      q("listen-by-f", "Что посмотреть у Браслава?", ["the lakes", "a memorial", "a castle only"], "the lakes"),
+      q("listen-by-g", "Где попробовать еду?", ["Dudutki", "Khatyn", "the border"], "Dudutki"),
+      q("listen-by-h", "Где прокатиться по старым улицам?", ["Grodno", "Naroch", "the plains"], "Grodno"),
     ],
   },
 ];

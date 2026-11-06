@@ -5,10 +5,11 @@ import { SERIES_AWARD, UNITS, achievementStatus, seriesUnlocked } from "@/lib/un
 import { TopBar } from "@/components/Shell";
 
 export default function AchievementsPage() {
-  const { family, env, career } = useProgress();
-  const states = { unit1: family, unit2: env, unit3: career };
-  const days = Math.max(family.dayStreak, env.dayStreak, career.dayStreak);
-  const seriesOn = seriesUnlocked([family.dayStreak, env.dayStreak, career.dayStreak]);
+  const { family, env, career, tour, belarus } = useProgress();
+  const states = { unit1: family, unit2: env, unit3: career, unit4: tour, unit6: belarus };
+  const streaks = [family.dayStreak, env.dayStreak, career.dayStreak, tour.dayStreak, belarus.dayStreak];
+  const days = Math.max(...streaks);
+  const seriesOn = seriesUnlocked(streaks);
   return (
     <main>
       <TopBar title="Достижения" />

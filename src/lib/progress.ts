@@ -14,6 +14,8 @@ type Api = {
   family: ProgressState;
   env: ProgressState;
   career: ProgressState;
+  tour: ProgressState;
+  belarus: ProgressState;
   currentUnit: QuestUnit;
   headerXp: number;
   ready: boolean;
@@ -27,6 +29,8 @@ type Api = {
   familyProgress: number;
   envProgress: number;
   careerProgress: number;
+  tourProgress: number;
+  belarusProgress: number;
   practiceIds: string[];
   masteredIds: string[];
   setCursor: (key: string, step: number) => void;
@@ -113,8 +117,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       family: states.unit1,
       env: states.unit2,
       career: states.unit3,
+      tour: states.unit4,
+      belarus: states.unit6,
       currentUnit,
-      headerXp: states.unit1.xp + states.unit2.xp + states.unit3.xp,
+      headerXp: UNITS.reduce((sum, unit) => sum + states[unit.id].xp, 0),
       ready,
       setName: (name) => {
         const n = name.trim().slice(0, 24) || "Ученик";
@@ -184,6 +190,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       familyProgress: unitPct(states.unit1, unitById("unit1")),
       envProgress: unitPct(states.unit2, unitById("unit2")),
       careerProgress: unitPct(states.unit3, unitById("unit3")),
+      tourProgress: unitPct(states.unit4, unitById("unit4")),
+      belarusProgress: unitPct(states.unit6, unitById("unit6")),
       practiceIds,
       masteredIds,
       selectUnit: (u) => {
