@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Mark } from "@/components/Marks";
 import { useProgress } from "@/lib/progress";
 import { finalHref, unitById, type QuestUnit } from "@/lib/units";
@@ -26,6 +26,15 @@ type HubCopy = {
   finalText: string;
   finalCtaClass: string;
 };
+
+function listenCountLabel(n: number) {
+  if (n === 4) return "Четыре записи";
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return `${n} запись`;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${n} записи`;
+  return `${n} записей`;
+}
 
 const HUB_COPY: Record<QuestUnit, HubCopy> = {
   unit1: {
@@ -122,6 +131,10 @@ export function UnitHub({ unitId }: { unitId: QuestUnit }) {
   const spec = unitById(unitId);
   const copy = HUB_COPY[unitId];
   const { state, moduleProgress, unitProgress, finalReady, tasksLeftForFinal, headerXp, selectUnit } = useProgress();
+  useEffect(() => {
+    selectUnit(unitId);
+    sessionStorage.setItem("eq-hub", spec.hubHref);
+  }, [unitId, spec.hubHref, selectUnit]);
   const finalOpen = finalReady;
   const cardClass = copy.animated ? CARD_CLASS.animated : CARD_CLASS.plain;
   const cardLinkClass = copy.animated ? CARD_LINK_CLASS.animated : CARD_LINK_CLASS.plain;
@@ -176,7 +189,7 @@ export function UnitHub({ unitId }: { unitId: QuestUnit }) {
               <div>
                 <div className="text-xs tracking-[0.18em]" style={{ color: spec.accent }}>{String(spec.modules.length + 1).padStart(2, "0")} · Доступно</div>
                 <h2 className="text-2xl sm:text-3xl">Аудирование</h2>
-                <p className="text-sm text-stone-600">{tracks.length === 4 ? "Четыре записи" : `${tracks.length} записей`}</p>
+                <p className="text-sm text-stone-600">{listenCountLabel(tracks.length)}</p>
                 <p className="mt-2 text-sm">{done} из {tracks.length} заданий</p>
                 <div className="mt-2 h-1.5 max-w-xs rounded-full bg-stone-900/10"><div className="h-full rounded-full" style={{ width: `${tracks.length ? Math.round((done / tracks.length) * 100) : 0}%`, background: spec.accent }} /></div>
               </div>
